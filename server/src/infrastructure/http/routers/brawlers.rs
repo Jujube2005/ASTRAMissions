@@ -14,8 +14,8 @@ use crate::{
 };
 
 pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
-    let brawlers_repository = BrawlerPostgres::new(db_pool);
-    let brawlers_use_case = BrawlersUseCase::new(Arc::new(brawlers_repository));
+    let repository = BrawlerPostgres::new(db_pool);
+    let use_case = BrawlersUseCase::new(Arc::new(repository));
 
     let protected_router = Router::new()
         .route("/avatar", post(upload_avatar))
@@ -24,7 +24,7 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     Router::new()
         .merge(protected_router)
         .route("/register", post(register))
-        .with_state(Arc::new(brawlers_use_case))
+        .with_state(Arc::new(use_case))
 }
 
 pub async fn register<T>(
@@ -35,7 +35,7 @@ where
     T: BrawlerRepository + Send + Sync,
 {
     match brawlers_use_case.register(register_brawler_model).await {
-        Ok(passport) => (StatusCode::OK, Json(passport)).into_response(),
+        Ok(passport) => (StatusCode::CREATED, Json(passport)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
 }

@@ -54,10 +54,10 @@ where
         Ok(result)
     }
     
-    pub async fn get_mission_count(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
+    pub async fn get_crew(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
         let result = self
             .mission_viewing_repository
-            .get_mission_count(mission_id)
+            .get_crew(mission_id)
             .await?;
 
         Ok(result)

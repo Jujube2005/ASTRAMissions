@@ -72,7 +72,8 @@ impl MissionViewingRepository for MissionViewingPostgres {
 
         Ok(value)
     }
-    async fn get_mission_count(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
+
+    async fn get_crew(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
         let sql = r#"
@@ -112,10 +113,10 @@ impl MissionViewingRepository for MissionViewingPostgres {
                 cm.mission_id = $1
         "#;
 
-        let result = diesel::sql_query(sql)
+        let brawler_list = diesel::sql_query(sql)
             .bind::<diesel::sql_types::Int4, _>(mission_id)
             .load::<BrawlerModel>(&mut conn)?;
 
-        Ok(result)
+        Ok(brawler_list)
     }
 }

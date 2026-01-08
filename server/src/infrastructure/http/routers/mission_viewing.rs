@@ -26,7 +26,7 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     Router::new()
         .route("/{mission_id}", get(view_details))
         .route("/gets", get(gets))
-        .route("/count/{mission_id}", get(get_mission_count))
+        .route("/crew/{mission_id}", get(get_crew))
         .with_state(Arc::new(use_case))
 }
 
@@ -56,14 +56,14 @@ where
     }
 }
 
-pub async fn get_mission_count<T>(
+pub async fn get_crew<T>(
     State(mission_viewing_use_case): State<Arc<MissionViewingUseCase<T>>>,
     Path(mission_id): Path<i32>,
 ) -> impl IntoResponse
 where
     T: MissionViewingRepository + Send + Sync,
 {
-    match mission_viewing_use_case.get_mission_count(mission_id).await {
+    match mission_viewing_use_case.get_crew(mission_id).await {
         Ok(brawler_models) => (StatusCode::OK, Json(brawler_models)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
