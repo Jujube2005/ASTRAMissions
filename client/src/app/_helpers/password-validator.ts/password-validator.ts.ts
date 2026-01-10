@@ -1,4 +1,5 @@
 import { AbstractControl, ValidatorFn,  ValidationErrors} from "@angular/forms"
+import { form } from "@angular/forms/signals"
 
 export const passwordValidatorv= (min: number, max: number): ValidatorFn => {
   return (ctrl: AbstractControl): ValidationErrors | null => {
@@ -13,8 +14,25 @@ export const passwordValidatorv= (min: number, max: number): ValidatorFn => {
   }
 }
 
-export const passwordMatchValidator = (ctrl_pw_name: string, ctrl_cf_pw_name: string): ValidatorFn => {
-  return () => {
-    return null
-  }
-}
+ export const PasswordMatchValidator = (ctrl_pw_name: string, ctrl_cf_pw_name: string): ValidatorFn => {
+    return (formGroup: AbstractControl): ValidationErrors | null => {
+        const ctrlPw = formGroup.get(ctrl_pw_name);
+        const ctrlCfPw = formGroup.get(ctrl_cf_pw_name);
+        if (!ctrlPw || !ctrlCfPw) return null;
+        const isMatch = ctrlPw.value === ctrlCfPw.value;
+        if (!isMatch) {
+            const errors = ctrlCfPw.errors || {};
+            ctrlCfPw.setErrors({ ...errors, mismatch: true });
+        } else {
+            if (ctrlCfPw.errors) {
+                delete ctrlCfPw.errors['mismatch'];
+                if (Object.keys(ctrlCfPw.errors).length === 0) {
+                    ctrlCfPw.setErrors(null);
+                } else {
+                    ctrlCfPw.setErrors(ctrlCfPw.errors);
+                }
+            }
+        }
+        return null;
+    };
+};
