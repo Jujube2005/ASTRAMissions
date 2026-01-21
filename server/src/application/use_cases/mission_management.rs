@@ -17,6 +17,7 @@ where
 }
 
 use anyhow::Result;
+
 impl<T1, T2> MissionManagementUseCase<T1, T2>
 where
     T1: MissionManagementRepository + Send + Sync,
@@ -32,19 +33,12 @@ where
         }
     }
 
-    pub async fn add(&self, chief_id: i32, mut add_mission_model: AddMissionModel) -> Result<i32> {
+    pub async fn add(&self, chief_id: i32, add_mission_model: AddMissionModel) -> Result<i32> {
         if add_mission_model.name.trim().is_empty() || add_mission_model.name.trim().len() < 3 {
             return Err(anyhow::anyhow!(
-                "Mission name must be at least 3 characters long."
+                "Mission name must be least 4 characters long"
             ));
         }
-        add_mission_model.description = add_mission_model.description.and_then(|s| {
-            if s.trim().is_empty() {
-                None
-            } else {
-                Some(s.trim().to_string())
-            }
-        });
 
         let insert_mission_entity = add_mission_model.to_entity(chief_id);
 
@@ -62,27 +56,17 @@ where
         chief_id: i32,
         mut edit_mission_model: EditMissionModel,
     ) -> Result<i32> {
-
-        if let Some(mission_name) = &edit_mission_model.name {
-            if mission_name.trim().is_empty() {
+        if let Some(name) = edit_mission_model.name {
+            if name.trim().is_empty() {
                 edit_mission_model.name = None;
-            }else if mission_name.trim().len() < 3 {
+            } else if name.trim().len() < 3 {
                 return Err(anyhow::anyhow!(
-                    "Mission name must be at least 3 characters long."
+                    "Mission name must be least 4 characters long"
                 ));
-            }else {
-                edit_mission_model.name = Some(mission_name.trim().to_string());
+            } else {
+                edit_mission_model.name = Some(name.trim().to_string())
             }
         }
-
-        edit_mission_model.description = edit_mission_model.description.and_then(|s| {
-            if s.trim().is_empty() {
-                None
-            } else {
-                Some(s.trim().to_string())
-            }
-        });
-
 
         let crew_count = self
             .mission_viewing_repository

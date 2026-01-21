@@ -10,10 +10,10 @@ use crate::{
 #[diesel(table_name = missions)]
 pub struct MissionEntity {
     pub id: i32,
-    pub name: String,
-    pub description: Option<String>,
-    pub status: String,
     pub chief_id: i32,
+    pub name: String,
+    pub status: String,
+    pub description: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,

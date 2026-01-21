@@ -2,7 +2,8 @@ use anyhow::Result;
 use async_trait::async_trait;
 
 use crate::domain::{
-    entities::missions::MissionEntity, value_objects::{brawler_model::BrawlerModel, mission_filter::MissionFilter},
+    entities::missions::MissionEntity,
+    value_objects::{brawler_model::BrawlerModel, mission_filter::MissionFilter},
 };
 
 #[async_trait]

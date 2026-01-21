@@ -14,7 +14,7 @@ where
     T2: MissionViewingRepository + Send + Sync,
 {
     mission_operation_repository: Arc<T1>,
-    missiom_viewing_repository: Arc<T2>,
+    mission_viewing_repository: Arc<T2>,
 }
 
 impl<T1, T2> MissionOperationUseCase<T1, T2>
@@ -22,18 +22,18 @@ where
     T1: MissionOperationRepository + Send + Sync,
     T2: MissionViewingRepository + Send + Sync,
 {
-    pub fn new(mission_operation_repository: Arc<T1>, missiom_viewing_repository: Arc<T2>) -> Self {
+    pub fn new(mission_operation_repository: Arc<T1>, mission_viewing_repository: Arc<T2>) -> Self {
         Self {
             mission_operation_repository,
-            missiom_viewing_repository,
+            mission_viewing_repository,
         }
     }
 
     pub async fn in_progress(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let crew_count = self
-            .missiom_viewing_repository
+            .mission_viewing_repository
             .crew_counting(mission_id)
             .await?;
 
@@ -49,26 +49,6 @@ where
             && crew_count < max_crew_per_mission
             && mission.chief_id == chief_id;
         if !update_condition {
-            if !is_status_open_or_fail {
-                return Err(anyhow::anyhow!(
-                    "Mission status must be Open or Failed to start. Current: {}",
-                    mission.status
-                ));
-            }
-            if crew_count <= 0 {
-                return Err(anyhow::anyhow!(
-                    "Mission must have at least one crew member"
-                ));
-            }
-            if crew_count >= max_crew_per_mission {
-                return Err(anyhow::anyhow!(
-                    "Mission crew limit reached or exceeded (Max: {})",
-                    max_crew_per_mission
-                ));
-            }
-            if mission.chief_id != chief_id {
-                return Err(anyhow::anyhow!("Only the Chief can start the mission"));
-            }
             return Err(anyhow::anyhow!("Invalid condition to change stages!"));
         }
 
@@ -79,20 +59,11 @@ where
         Ok(result)
     }
     pub async fn to_completed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let update_condition = mission.status == MissionStatuses::InProgress.to_string()
             && mission.chief_id == chief_id;
         if !update_condition {
-            if mission.status != MissionStatuses::InProgress.to_string() {
-                return Err(anyhow::anyhow!(
-                    "Mission must be In Progress to complete. Current: {}",
-                    mission.status
-                ));
-            }
-            if mission.chief_id != chief_id {
-                return Err(anyhow::anyhow!("Only the Chief can complete the mission"));
-            }
             return Err(anyhow::anyhow!("Invalid condition to change stages!"));
         }
         let result = self
@@ -103,20 +74,11 @@ where
         Ok(result)
     }
     pub async fn to_failed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let update_condition = mission.status == MissionStatuses::InProgress.to_string()
             && mission.chief_id == chief_id;
         if !update_condition {
-            if mission.status != MissionStatuses::InProgress.to_string() {
-                return Err(anyhow::anyhow!(
-                    "Mission must be In Progress to fail. Current: {}",
-                    mission.status
-                ));
-            }
-            if mission.chief_id != chief_id {
-                return Err(anyhow::anyhow!("Only the Chief can fail the mission"));
-            }
             return Err(anyhow::anyhow!("Invalid condition to change stages!"));
         }
         let result = self

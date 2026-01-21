@@ -21,66 +21,61 @@ use crate::{
                 crew_operation::CrewOperationPostgres, mission_viewing::MissionViewingPostgres,
             },
         },
-        http::middleware::auth::authorization,
+        http::middlewares::auth::auth,
     },
 };
 
-pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
-    let crew_operation_repository = CrewOperationPostgres::new(Arc::clone(&db_pool));
-    let mission_viewing_repository = MissionViewingPostgres::new(Arc::clone(&db_pool));
-
-    let use_case = CrewOperationUseCase::new(
-        Arc::new(crew_operation_repository),
-        Arc::new(mission_viewing_repository),
-    );
-
-    Router::new()
-        .route("/join/{mission_id}", post(join))
-        .route("/leave/{mission_id}", delete(leave))
-        .route_layer(middleware::from_fn(authorization))
-        .with_state(Arc::new(use_case))
-}
-
 pub async fn join<T1, T2>(
-    State(crew_operation_use_case): State<Arc<CrewOperationUseCase<T1, T2>>>,
-    Extension(brawler_id): Extension<i32>,
+    State(user_case): State<Arc<CrewOperationUseCase<T1, T2>>>,
+    Extension(user_id): Extension<i32>,
     Path(mission_id): Path<i32>,
 ) -> impl IntoResponse
 where
     T1: CrewOperationRepository + Send + Sync + 'static,
     T2: MissionViewingRepository + Send + Sync,
 {
-    match crew_operation_use_case.join(mission_id, brawler_id).await {
+    match user_case.join(mission_id, user_id).await {
         Ok(_) => (
             StatusCode::OK,
-            format!(
-                "Brawler id: {}, has joined mission id: {}",
-                brawler_id, mission_id
-            ),
+            format!("Join Mission_id:{} completed", mission_id),
         )
             .into_response(),
+
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
 }
 
 pub async fn leave<T1, T2>(
-    State(crew_operation_use_case): State<Arc<CrewOperationUseCase<T1, T2>>>,
-    Extension(brawler_id): Extension<i32>,
+    State(user_case): State<Arc<CrewOperationUseCase<T1, T2>>>,
+    Extension(user_id): Extension<i32>,
     Path(mission_id): Path<i32>,
 ) -> impl IntoResponse
 where
     T1: CrewOperationRepository + Send + Sync + 'static,
     T2: MissionViewingRepository + Send + Sync,
 {
-    match crew_operation_use_case.leave(mission_id, brawler_id).await {
+    match user_case.leave(mission_id, user_id).await {
         Ok(_) => (
             StatusCode::OK,
-            format!(
-                "Brawler id: {}, has left mission id: {}",
-                brawler_id, mission_id
-            ),
+            format!("Leave Mission_id:{} completed", mission_id),
         )
             .into_response(),
+
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
+}
+
+pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
+    let crew_operation_repository = CrewOperationPostgres::new(Arc::clone(&db_pool));
+    let viewing_repositiory = MissionViewingPostgres::new(Arc::clone(&db_pool));
+    let user_case = CrewOperationUseCase::new(
+        Arc::new(crew_operation_repository),
+        Arc::new(viewing_repositiory),
+    );
+
+    Router::new()
+        .route("/join/{mission_id}", post(join))
+        .route("/leave/{mission_id}", delete(leave))
+        .route_layer(middleware::from_fn(auth))
+        .with_state(Arc::new(user_case))
 }

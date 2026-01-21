@@ -1,6 +1,7 @@
-use crate::config::{config_loader::get_cloundinary_env, config_model::CloudinaryEnv};
-use crate::domain::value_objects::base64_image::Base64Image;
-use crate::domain::value_objects::uploaded_image::UploadedImage;
+use crate::{
+    config::{config_loader::get_cloudinary_env, config_model::CloudinaryEnv},
+    domain::value_objects::{base64_img::Base64Img, uploaded_img::UploadedImg},
+};
 use anyhow::{Context, Ok, Result};
 use chrono::Utc;
 use reqwest::multipart::{Form, Part};
@@ -57,11 +58,8 @@ fn form_builder(option: UploadImageOptions, cloud_env: &CloudinaryEnv) -> Result
     Ok(form)
 }
 
-pub async fn upload(
-    base64_image: Base64Image,
-    option: UploadImageOptions,
-) -> Result<UploadedImage> {
-    let cloud_env = get_cloundinary_env()?;
+pub async fn upload(base64_image: Base64Img, option: UploadImageOptions) -> Result<UploadedImg> {
+    let cloud_env = get_cloudinary_env()?;
 
     let file = Part::text(base64_image.into_inner());
     let form = form_builder(option, &cloud_env)?;
@@ -80,7 +78,7 @@ pub async fn upload(
         .context(format!("upload to {}", url))?;
 
     let text = response.text().await?;
-    let json: UploadedImage =
+    let json: UploadedImg =
         serde_json::from_str(&text).context(format!("failed to parse:\n\n {}", text))?;
     Ok(json)
 }

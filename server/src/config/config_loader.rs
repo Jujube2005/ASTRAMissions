@@ -1,3 +1,5 @@
+use std::env;
+
 use anyhow::Result;
 
 use crate::config::{
@@ -48,33 +50,17 @@ pub fn get_stage() -> Stage {
 
 pub fn get_jwt_env() -> Result<JwtEnv> {
     dotenvy::dotenv().ok();
-
-    let secret = std::env::var("JWT_USER_SECRET")
-        .expect("JWT_USER_SECRET is valid")
-        .parse()?;
-
-    let life_time_days = std::env::var("JWT_LIFE_TIME_DAYS")?
-        .parse::<i64>()?;
-
     Ok(JwtEnv {
-        secret,
-        life_time_days,
+        secret: env::var("JWT_USER_SECRET")?,
+        ttl: env::var("JWT_TTL")?.parse::<i64>()?,
     })
 }
 
-
-pub fn get_cloundinary_env() -> Result<CloudinaryEnv> {
+pub fn get_cloudinary_env() -> Result<CloudinaryEnv> {
     dotenvy::dotenv().ok();
-
-    let cloud_name = std::env::var("CLOUDINARY_CLOUD_NAME")?;
-
-    let api_key = std::env::var("CLOUDINARY_API_KEY")?;
-
-    let api_secret = std::env::var("CLOUDINARY_API_SECRET")?;
-
     Ok(CloudinaryEnv {
-        cloud_name,
-        api_key,
-        api_secret,
+        cloud_name: env::var("CLOUDINARY_CLOUD_NAME")?,
+        api_key: env::var("CLOUDINARY_API_KEY")?,
+        api_secret: env::var("CLOUDINARY_API_SECRET")?,
     })
 }
