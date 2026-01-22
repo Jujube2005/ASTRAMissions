@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http'
 import { inject, Injectable, signal } from '@angular/core'
-import { environment } from '../../environments/environment'
+import { environment } from '../../environments/environment' ///
 import { LoginModel, Passport, RegisterModel } from '../_models/passport'
-import { firstValueFrom, catchError, throwError } from 'rxjs'
+import { firstValueFrom } from 'rxjs'
+import { H } from '@angular/cdk/keycodes'
+import { getAvatarUrl } from '../_helpers/util'
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +15,17 @@ export class PassportService {
   private _http = inject(HttpClient)
 
   data = signal<undefined | Passport>(undefined)
+  avatar = signal<string>("")
+
+  saveAvatarImgUrl(url: string) {
+    let passport = this.data()
+    if (passport) {
+      passport.avatar_url = url
+      this.avatar.set(url)
+      this.data.set(passport)
+      this.savePassportToLocalStorage()
+    }
+  }
 
   private loadPassportFormLocalStorage(): string | null {
     const jsonString = localStorage.getItem(this._key)
@@ -20,6 +33,8 @@ export class PassportService {
     try {
       const passport = JSON.parse(jsonString) as Passport
       this.data.set(passport)
+      const avatar = getAvatarUrl(passport)
+      this.avatar.set(avatar)
     } catch (error) {
       return `${error}`
     }
@@ -39,6 +54,7 @@ export class PassportService {
 
   destroy() {
     this.data.set(undefined)
+    this.avatar.set("")
     localStorage.removeItem(this._key)
   }
 
@@ -54,18 +70,17 @@ export class PassportService {
 
   private async fetchPassport(api_url: string, model: LoginModel | RegisterModel): Promise<string | null> {
     try {
-      const result = this._http.post<Passport>(api_url, model).pipe(
-        catchError((error: any) => {
-          const errorMsg = error.error?.message || error.statusText || 'server-error'
-          return throwError(() => new Error(errorMsg))
-        })
-      )
+      const result = this._http.post<Passport>(api_url, model)
       const passport = await firstValueFrom(result)
       this.data.set(passport)
       this.savePassportToLocalStorage()
       return null
     } catch (error: any) {
-      return error.message || 'server-error'
+      // console.error(error)
+      // console.log(error.error)
+      return error.error
     }
+
   }
+
 }

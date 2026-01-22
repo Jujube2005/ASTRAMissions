@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core'
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
-import { PasswordMatchValidator, PasswordValidator } from '../_helpers/password-validator/password-validator'
+import { PasswordMatchValidator, PasswordValidator } from '../_helpers/password-validator'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { MatButtonModule } from '@angular/material/button'
@@ -23,7 +23,7 @@ export class Login {
 
   private displaynameMinLength = 3
 
-  mode: 'login' | 'register' = 'login'
+  mode: 'login' | ' register' = 'login'
   form: FormGroup
 
   errorMsg = {
@@ -54,7 +54,7 @@ export class Login {
   }
 
   toggleMode() {
-    this.mode = this.mode === 'login' ? 'register' : 'login'
+    this.mode = this.mode === 'login' ? ' register' : 'login'
     this.updateForm()
   }
 
@@ -70,7 +70,6 @@ export class Login {
 
       this.form.addControl('display_name', new FormControl(null, [Validators.required, Validators.minLength(this.displaynameMinLength)]))
     }
-    this.form.updateValueAndValidity()
   }
 
   updateErrorMsg(ctrlName: string): void | null {

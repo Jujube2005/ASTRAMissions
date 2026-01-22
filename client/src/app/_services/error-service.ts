@@ -18,9 +18,13 @@ export class ErrorService {
     if (error) {
       switch (error.status) {
         case 400:
-          const errorMsg = error.error?.message || error.error || 'bad request'
           console.log(error)
-          this._snackBar.open(errorMsg, 'ok', this._snackBarConfig)
+          if (error.error === 'Record not found')
+            this._snackBar.open("Invalid username or password", 'ok', this._snackBarConfig)
+          else if (error.error !== '')
+            this._snackBar.open(error.error, 'ok', this._snackBarConfig)
+          else
+            this._snackBar.open('bad request', 'ok', this._snackBarConfig)
           break
         case 404:
           this._router.navigate(['/not-found'])
@@ -53,4 +57,3 @@ export class ErrorService {
     return throwError(() => error)
   }
 }
-
