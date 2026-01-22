@@ -7,7 +7,6 @@ use crate::{
     domain::repositories::brawlers::BrawlerRepository,
     infrastructure::{
         database::{postgresql_connection::PgPoolSquad, repositories::brawlers::BrawlerPostgres},
-        http::error_response::ErrorResponse,
         jwt::authentication_model::LoginModel,
     },
 };
@@ -22,11 +21,7 @@ where
     match user_case.login(model).await {
         Ok(passport) => (StatusCode::OK, Json(passport)).into_response(),
 
-        Err(e) => (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse::new(e.to_string())),
-        )
-            .into_response(),
+        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
     }
 }
 

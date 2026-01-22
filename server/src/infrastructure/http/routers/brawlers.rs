@@ -13,7 +13,7 @@ use crate::{
     },
     infrastructure::{
         database::{postgresql_connection::PgPoolSquad, repositories::brawlers::BrawlerPostgres},
-        http::{error_response::ErrorResponse, middlewares::auth::auth},
+        http::middlewares::auth::auth,
     },
 };
 
@@ -41,11 +41,7 @@ where
     match user_case.register(model).await {
         Ok(passport) => (StatusCode::CREATED, Json(passport)).into_response(),
 
-        Err(e) => (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse::new(e.to_string())),
-        )
-            .into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
 }
 
