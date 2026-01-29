@@ -2,12 +2,13 @@ use crate::{
     domain::{
         repositories::brawlers::BrawlerRepository,
         value_objects::{
-            base64_img::Base64Img, brawler_model::RegisterBrawlerModel, uploaded_img::UploadedImg,
+            base64_img::Base64Img, brawler_model::RegisterBrawlerModel,
+            mission_model::MissionModel, uploaded_img::UploadedImg,
         },
     },
     infrastructure::{argon2::hash, cloudinary::UploadImageOptions, jwt::jwt_model::Passport},
 };
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use std::sync::Arc;
 
 pub struct BrawlersUseCase<T>
@@ -35,17 +36,9 @@ where
 
         let register_entity = register_brawler_model.to_entity();
 
-        match self.brawler_repository.register(register_entity).await {
-            Ok(passport) => Ok(passport),
-            Err(e) => {
-                let error_msg = e.to_string();
-                if error_msg.contains("unique_username") || error_msg.contains("duplicate key") {
-                    Err(anyhow::anyhow!("Username already exists"))
-                } else {
-                    Err(e)
-                }
-            }
-        }
+        let passport = self.brawler_repository.register(register_entity).await?;
+
+        Ok(passport)
     }
 
     pub async fn upload_base64img(
@@ -67,5 +60,10 @@ where
             .await?;
 
         Ok(uploaded)
+    }
+
+    pub async fn get_missions(&self, brawler_id: i32) -> Result<Vec<MissionModel>> {
+        let missions = self.brawler_repository.get_missions(brawler_id).await?;
+        Ok(missions)
     }
 }

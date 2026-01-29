@@ -2,17 +2,16 @@ use std::sync::Arc;
 
 use anyhow::{Ok, Result};
 use async_trait::async_trait;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::prelude::*;
 
 use crate::{
     domain::{
         repositories::mission_viewing::MissionViewingRepository,
-        value_objects::{brawler_model::BrawlerModel, mission_filter::MissionFilter, mission_model::MissionModel},
+        value_objects::{
+            brawler_model::BrawlerModel, mission_filter::MissionFilter, mission_model::MissionModel,
+        },
     },
-    infrastructure::database::{
-        postgresql_connection::PgPoolSquad,
-        schema::crew_memberships,
-    },
+    infrastructure::database::{postgresql_connection::PgPoolSquad, schema::crew_memberships},
 };
 pub struct MissionViewingPostgres {
     db_pool: Arc<PgPoolSquad>,
@@ -39,67 +38,69 @@ impl MissionViewingRepository for MissionViewingPostgres {
     }
 
     async fn get_one(&self, mission_id: i32) -> Result<MissionModel> {
-        let sql = r#"
-            SELECT 
-                m.id,
-                m.name,
-                m.description,
-                m.status,
-                m.chief_id,
-                b.display_name AS chief_display_name,
-                COALESCE(cm.cnt, 0) AS crew_count,
-                m.created_at,
-                m.updated_at
-            FROM missions m
-            LEFT JOIN brawlers b ON b.id = m.chief_id
-            LEFT JOIN (
-                SELECT mission_id, COUNT(*) AS cnt
-                FROM crew_memberships
-                GROUP BY mission_id
-            ) cm ON cm.mission_id = m.id
-            WHERE m.id = $1 AND m.deleted_at IS NULL
-        "#;
         let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        let sql = r#"
+SELECT m.id,
+        m.name,
+        m.description,
+        m.status,
+        m.chief_id,
+        COALESCE(b.display_name, '') AS chief_display_name,
+        COUNT(cm.brawler_id) AS crew_count,
+        m.created_at,
+        m.updated_at
+FROM missions m
+LEFT JOIN brawlers b ON b.id = m.chief_id
+LEFT JOIN crew_memberships cm ON cm.mission_id = m.id
+WHERE m.deleted_at IS NULL
+    AND m.id = $1
+GROUP BY m.id, b.display_name, m.name, m.description, m.status, m.chief_id, m.created_at, m.updated_at
+LIMIT 1
+        "#;
+
         let result = diesel::sql_query(sql)
             .bind::<diesel::sql_types::Int4, _>(mission_id)
             .get_result::<MissionModel>(&mut conn)?;
+
         Ok(result)
     }
 
     async fn get_all(&self, mission_filter: &MissionFilter) -> Result<Vec<MissionModel>> {
-        let sql = r#"
-            SELECT 
-                m.id,
-                m.name,
-                m.description,
-                m.status,
-                m.chief_id,
-                b.display_name AS chief_display_name,
-                COALESCE(cm.cnt, 0) AS crew_count,
-                m.created_at,
-                m.updated_at
-            FROM missions m
-            LEFT JOIN brawlers b ON b.id = m.chief_id
-            LEFT JOIN (
-                SELECT mission_id, COUNT(*) AS cnt
-                FROM crew_memberships
-                GROUP BY mission_id
-            ) cm ON cm.mission_id = m.id
-            WHERE m.deleted_at IS NULL
-              AND ($1::varchar IS NULL OR m.status = $1)
-              AND ($2::varchar IS NULL OR m.name ILIKE $2)
-            ORDER BY m.created_at DESC
-        "#;
-
-        let status_param = mission_filter.status.as_ref().map(|s| s.to_string());
-        let name_param = mission_filter.name.as_ref().map(|n| format!("%{}%", n));
+        use diesel::sql_types::{Nullable, Varchar};
 
         let mut conn = Arc::clone(&self.db_pool).get()?;
-        let value = diesel::sql_query(sql)
-            .bind::<diesel::sql_types::Nullable<diesel::sql_types::VarChar>, _>(status_param)
-            .bind::<diesel::sql_types::Nullable<diesel::sql_types::VarChar>, _>(name_param)
+
+        let sql = r#"
+SELECT m.id,
+        m.name,
+        m.description,
+        m.status,
+        m.chief_id,
+        COALESCE(b.display_name, '') AS chief_display_name,
+        COUNT(cm.brawler_id) AS crew_count,
+        m.created_at,
+        m.updated_at
+FROM missions m
+LEFT JOIN brawlers b ON b.id = m.chief_id
+LEFT JOIN crew_memberships cm ON cm.mission_id = m.id
+WHERE m.deleted_at IS NULL
+    AND ($1::varchar IS NULL OR m.status = $1)
+    AND ($2::varchar IS NULL OR m.name ILIKE $2)
+GROUP BY m.id, b.display_name, m.name, m.description, m.status, m.chief_id, m.created_at, m.updated_at
+ORDER BY m.created_at DESC
+        "#;
+
+        // Prepare optional bind values
+        let status_bind: Option<String> = mission_filter.status.as_ref().map(|s| s.to_string());
+        let name_bind: Option<String> = mission_filter.name.as_ref().map(|n| format!("%{}%", n));
+
+        let rows = diesel::sql_query(sql)
+            .bind::<Nullable<Varchar>, _>(status_bind)
+            .bind::<Nullable<Varchar>, _>(name_bind)
             .load::<MissionModel>(&mut conn)?;
-        Ok(value)
+
+        Ok(rows)
     }
 
     async fn get_crew(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
@@ -131,34 +132,5 @@ impl MissionViewingRepository for MissionViewingPostgres {
             .load::<BrawlerModel>(&mut conn)?;
 
         Ok(brawler_list)
-    }
- 
-    async fn get_missions(&self, brawler_id: i32) -> Result<Vec<MissionModel>> {
-        let sql = r#"
-            SELECT 
-                m.id,
-                m.name,
-                m.description,
-                m.status,
-                m.chief_id,
-                b.display_name AS chief_display_name,
-                COALESCE(cm.cnt, 0) AS crew_count,
-                m.created_at,
-                m.updated_at
-            FROM missions m
-            LEFT JOIN brawlers b ON b.id = m.chief_id
-            LEFT JOIN (
-                SELECT mission_id, COUNT(*) AS cnt
-                FROM crew_memberships
-                GROUP BY mission_id
-            ) cm ON cm.mission_id = m.id
-            WHERE m.deleted_at IS NULL AND m.chief_id = $1
-            ORDER BY m.created_at DESC
-        "#;
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        let results = diesel::sql_query(sql)
-            .bind::<diesel::sql_types::Int4, _>(brawler_id)
-            .load::<MissionModel>(&mut conn)?;
-        Ok(results)
     }
 }
