@@ -20,13 +20,16 @@
         <div *ngIf="!isEditing">
             <h3>{{mission.name}} <span class="badge" [class]="mission.status">{{mission.status}}</span></h3>
             <p>{{mission.description}}</p>
-            <div class="actions" *ngIf="mission.status !== 'Completed'">
+            <div class="actions" *ngIf="mission.status !== 'Completed' && isChief">
                 <button (click)="toggleEdit()">Edit Details</button>
                 <button (click)="deleteMission()" class="danger">Delete Mission</button>
             </div>
+            <div class="actions" *ngIf="!isChief">
+                <button (click)="leaveMission()" class="warn">Leave Mission</button>
+            </div>
         </div>
 
-        <div *ngIf="isEditing" class="edit-form">
+        <div *ngIf="isEditing && isChief" class="edit-form">
             <input [(ngModel)]="editName" placeholder="Mission Name" />
             <textarea [(ngModel)]="editDescription" placeholder="Description"></textarea>
             <div class="form-actions">
@@ -36,9 +39,16 @@
         </div>
     </div>
 
-    <div class="mission-controls">
-        <button *ngIf="(mission.status === 'Open' || mission.status === 'Failed') && crew.length > 0" (click)="startMission()" class="primary">Start Mission</button>
-        <button *ngIf="mission.status === 'InProgress'" (click)="completeMission()" class="success">Complete Mission</button>
+    <div class="mission-controls" *ngIf="isChief">
+        <button *ngIf="(mission.status === 'Open' || mission.status === 'Failed') && crew.length > 0"
+            (click)="startMission()" class="primary">Start Mission</button>
+        <button *ngIf="mission.status === 'InProgress'" (click)="completeMission()" class="success">Complete
+            Mission</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h3>Chat</h3>
+        <app-mission-chat [missionId]="missionId" [chiefId]="mission.chief_id"></app-mission-chat>
     </div>
 
     <div class="crew-section">
@@ -47,9 +57,11 @@
             <div class="crew-item" *ngFor="let member of crew">
                 <div class="info">
                     <img [src]="member.avatar_url || 'https://via.placeholder.com/40'" alt="Avatar" class="avatar">
-                    <span>{{member.display_name}}</span>
+                    <span [class.chief-star]="member.id === mission.chief_id">{{member.display_name}} <span
+                            *ngIf="member.id === mission.chief_id">(Chief)</span></span>
                 </div>
-                <div class="actions" *ngIf="mission.status !== 'Completed'">
+                <div class="actions"
+                    *ngIf="mission.status !== 'Completed' && isChief && member.id !== mission.chief_id">
                     <button (click)="kick(member.id)" class="warn">Kick</button>
                     <button (click)="makeChief(member.id)">Make Chief</button>
                 </div>

@@ -14,7 +14,7 @@
 .error-container {
     padding: 40px;
     text-align: center;
-    
+
     .error-msg {
         color: #d32f2f;
         font-size: 1.2rem;
@@ -46,11 +46,23 @@
         padding: 4px 8px;
         border-radius: 4px;
         color: white;
-        
-        &.Open { background: #2196F3; }
-        &.InProgress { background: #FFC107; color: black; }
-        &.Completed { background: #4CAF50; }
-        &.Failed { background: #F44336; }
+
+        &.Open {
+            background: #2196F3;
+        }
+
+        &.InProgress {
+            background: #FFC107;
+            color: black;
+        }
+
+        &.Completed {
+            background: #4CAF50;
+        }
+
+        &.Failed {
+            background: #F44336;
+        }
     }
 
     .actions {
@@ -65,12 +77,13 @@
     flex-direction: column;
     gap: 10px;
 
-    input, textarea {
+    input,
+    textarea {
         padding: 8px;
         border: 1px solid #ccc;
         border-radius: 4px;
     }
-    
+
     .form-actions {
         display: flex;
         gap: 10px;
@@ -108,7 +121,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            
+
             .avatar {
                 width: 40px;
                 height: 40px;
@@ -131,10 +144,50 @@ button {
     border-radius: 4px;
     background: #e0e0e0;
 
-    &:hover { background: #d0d0d0; }
+    &:hover {
+        background: #d0d0d0;
+    }
 
-    &.primary { background: #2196F3; color: white; &:hover { background: #1976D2; } }
-    &.success { background: #4CAF50; color: white; &:hover { background: #388E3C; } }
-    &.warn { background: #FF9800; color: white; &:hover { background: #F57C00; } }
-    &.danger { background: #F44336; color: white; &:hover { background: #D32F2F; } }
+    &.primary {
+        background: #2196F3;
+        color: white;
+
+        &:hover {
+            background: #1976D2;
+        }
+    }
+
+    &.success {
+        background: #4CAF50;
+        color: white;
+
+        &:hover {
+            background: #388E3C;
+        }
+    }
+
+    &.warn {
+        background: #FF9800;
+        color: white;
+
+        &:hover {
+            background: #F57C00;
+        }
+    }
+
+    &.danger {
+        background: #F44336;
+        color: white;
+
+        &:hover {
+            background: #D32F2F;
+        }
+    }
+}
+
+.chief-star {
+    font-weight: bold;
+    color: #ffd700;
+    /* Gold */
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
 }

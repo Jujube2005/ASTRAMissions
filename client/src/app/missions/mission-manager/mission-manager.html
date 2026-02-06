@@ -1,4 +1,4 @@
-<div matButton class="new-mission">
+<div class="new-mission">
     <button mat-raised-button (click)="openDialog()"><mat-icon>add</mat-icon> new mission</button>
 </div>
 
@@ -6,6 +6,8 @@
     @if((myMissions$ | async)?.length) {
     <div class="header">
         <span class="name">Name</span>
+        <span class="role">Role</span>
+        <span class="chief">Chief</span>
         <span class="description">Description</span>
         <span class="category">Category</span>
         <span class="crew_count">Number of Crew</span>
@@ -23,6 +25,14 @@
             }
             {{mission.name}}
         </span>
+        <span class="role">
+            @if (mission.chief_id === (passport.userId())) {
+            <span style="color: gold; font-weight: bold;">Chief</span>
+            } @else {
+            <span style="color: #aaa;">Member</span>
+            }
+        </span>
+        <span class="chief">{{mission.chief_display_name}}</span>
         <span class="description">{{mission.description}}</span>
         <span class="category">{{mission.category}}</span>
         <span class="crew_count">{{mission.crew_count}} / {{mission.max_crew}}</span>

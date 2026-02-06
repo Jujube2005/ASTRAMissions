@@ -52,8 +52,8 @@
 .mission-list .header,
 .mission-list .contents {
     display: grid;
-    /* Added 1fr for Category */
-    grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr;
+    /* Updated for 10 columns including Chief and Role */
+    grid-template-columns: 1.5fr 0.8fr 1.2fr 2fr 1fr 1fr 0.8fr 1.2fr 1.2fr 0.5fr;
     align-items: center;
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
@@ -117,6 +117,8 @@
 }
 
 .mission-list .name,
+.mission-list .role,
+.mission-list .chief,
 .mission-list .description,
 .mission-list .category,
 .mission-list .crew_count,
@@ -140,7 +142,7 @@
 
     .mission-list .header,
     .mission-list .contents {
-        grid-template-columns: 1.2fr 1.5fr 0.8fr 0.8fr 0.8fr 1fr 1fr 0.8fr;
+        grid-template-columns: 1.5fr 0.8fr 1.2fr 2fr 1fr 1fr 0.8fr 1.2fr 1.2fr 0.5fr;
         font-size: 0.95rem;
         padding: 0.5rem 0.5rem;
     }
@@ -150,7 +152,7 @@
 
     .mission-list .header,
     .mission-list .contents {
-        grid-template-columns: 1fr 1.5fr 0.7fr 0.7fr 0.7fr 1fr 1fr 0.7fr;
+        grid-template-columns: 1.5fr 0.8fr 1.2fr 2fr 1fr 1fr 0.8fr 1.2fr 1.2fr 0.5fr;
         font-size: 0.85rem;
         padding: 0.3rem 0.2rem;
     }

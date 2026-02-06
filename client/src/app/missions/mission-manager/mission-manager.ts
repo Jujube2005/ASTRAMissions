@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core'
 import { MissionService } from '../../_services/mission-service'
-import { MatDialog } from '@angular/material/dialog'
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 import { Mission } from '../../_models/mission'
 import { NewMission } from '../../_dialogs/new-mission/new-mission'
 import { AddMission } from '../../_models/add-mission'
 import { MatIconModule } from '@angular/material/icon'
+import { MatButtonModule } from '@angular/material/button'
 import { AsyncPipe, DatePipe } from '@angular/common'
 import { BehaviorSubject } from 'rxjs'
 import { PassportService } from '../../_services/passport-service'
@@ -13,14 +14,14 @@ import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-mission-manager',
-  imports: [MatIconModule, DatePipe, AsyncPipe],
+  imports: [MatIconModule, MatButtonModule, MatDialogModule, DatePipe, AsyncPipe],
   templateUrl: './mission-manager.html',
   styleUrl: './mission-manager.scss',
 })
 export class MissionManager {
   private _mission = inject(MissionService)
   private _dialog = inject(MatDialog)
-  private _passport = inject(PassportService)
+  public passport = inject(PassportService)
   private _missionsSubject = new BehaviorSubject<Mission[]>([])
   readonly myMissions$ = this._missionsSubject.asObservable()
   private _notification = inject(NotificationService)
@@ -29,7 +30,7 @@ export class MissionManager {
 
   constructor() {
     this.loadMyMission()
-    this._notification.notifications$.subscribe(n => {
+    this._notification.notifications$.subscribe((n: any) => {
       if (n.type === 'JoinMission' && n.metadata?.mission_id) {
         this.joinAlerts.add(Number(n.metadata.mission_id))
       }
@@ -37,8 +38,30 @@ export class MissionManager {
   }
 
   private async loadMyMission() {
-    const missions = await this._mission.getMyMissions()
-    this._missionsSubject.next(missions)
+    try {
+      const [owned, joined] = await Promise.all([
+        this._mission.getMyMissions(),
+        this._mission.getJoinedMissions()
+      ])
+
+      // Add a flag or just merge. Mission model has chief_id, so we can check ownership dynamically.
+      // But distinct lists might be better?
+      // User requested "Show combined".
+
+      // Let's filter out duplicates if any (though shouldn't be if logic is correct: created != joined)
+      const missionMap = new Map<number, Mission>()
+      owned.forEach((m: Mission) => missionMap.set(m.id, m))
+      joined.forEach((m: Mission) => missionMap.set(m.id, m))
+
+      const allMissions = Array.from(missionMap.values())
+
+      // Sort by updated_at desc
+      allMissions.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+
+      this._missionsSubject.next(allMissions)
+    } catch (e) {
+      console.error('Failed to load missions', e)
+    }
   }
 
   navigateToMission(id: number) {
@@ -55,7 +78,7 @@ export class MissionManager {
   }
 
   openDialog() {
-    let chief_display_name = this._passport.data()?.display_name || "unnamed"
+    let chief_display_name = this.passport.data()?.display_name || "unnamed"
     const ref = this._dialog.open(NewMission)
     ref.afterClosed().subscribe(async (addMission: AddMission) => {
       if (addMission) {

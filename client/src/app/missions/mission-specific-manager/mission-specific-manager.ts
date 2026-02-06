@@ -4,11 +4,13 @@ import { MissionService } from '../../_services/mission-service'
 import { Mission } from '../../_models/mission'
 import { CommonModule, Location } from '@angular/common'
 import { FormsModule } from '@angular/forms'
+import { PassportService } from '../../_services/passport-service'
+import { MissionChatComponent } from '../../_components/mission-chat/mission-chat'
 
 @Component({
   selector: 'app-mission-specific-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MissionChatComponent],
   templateUrl: './mission-specific-manager.html',
   styleUrl: './mission-specific-manager.scss',
 })
@@ -18,6 +20,7 @@ export class MissionSpecificManager implements OnInit {
   private _missionService = inject(MissionService)
   private _location = inject(Location)
   private _cdr = inject(ChangeDetectorRef)
+  private _passport = inject(PassportService)
   private _loadingTimer: any = null
 
   missionId: number = 0
@@ -25,11 +28,16 @@ export class MissionSpecificManager implements OnInit {
   crew: any[] = []
   isLoading = false
   error: string | null = null
-  
+
   // Edit form
   isEditing = false
   editName = ''
   editDescription = ''
+
+  get isChief(): boolean {
+    const userId = this._passport.userId()
+    return !!(this.mission && userId && this.mission.chief_id === userId)
+  }
 
   async ngOnInit() {
     this.missionId = Number(this._route.snapshot.paramMap.get('id'))
@@ -57,10 +65,10 @@ export class MissionSpecificManager implements OnInit {
         this._missionService.getMission(this.missionId),
         this._missionService.getCrew(this.missionId)
       ])
-      
+
       this.mission = mission
       this.crew = crew
-      
+
       this.editName = this.mission.name
       this.editDescription = this.mission.description || ''
     } catch (e: any) {
@@ -89,15 +97,15 @@ export class MissionSpecificManager implements OnInit {
       alert(e?.error?.message || 'Failed')
     }
   }
-  
+
   async completeMission() {
-      if (!confirm('Complete mission?')) return
-      try {
-        await this._missionService.completeMission(this.missionId)
-        await this.loadData()
-      } catch (e: any) {
-        alert(e?.error?.message || 'Failed')
-      }
+    if (!confirm('Complete mission?')) return
+    try {
+      await this._missionService.completeMission(this.missionId)
+      await this.loadData()
+    } catch (e: any) {
+      alert(e?.error?.message || 'Failed')
+    }
   }
 
   async deleteMission() {
@@ -113,9 +121,9 @@ export class MissionSpecificManager implements OnInit {
   toggleEdit() {
     this.isEditing = !this.isEditing
     if (!this.isEditing && this.mission) {
-        // Reset
-        this.editName = this.mission.name
-        this.editDescription = this.mission.description || ''
+      // Reset
+      this.editName = this.mission.name
+      this.editDescription = this.mission.description || ''
     }
   }
 
@@ -152,6 +160,16 @@ export class MissionSpecificManager implements OnInit {
       this._router.navigate(['/chief'])
     } catch (e: any) {
       alert(e?.error?.message || 'Failed')
+    }
+  }
+
+  async leaveMission() {
+    if (!confirm('Are you sure you want to leave this mission?')) return
+    try {
+      await this._missionService.leaveMission(this.missionId)
+      this._router.navigate(['/chief']) // Redirect to My Missions
+    } catch (e: any) {
+      alert(e?.error?.message || 'Leave failed')
     }
   }
 }
