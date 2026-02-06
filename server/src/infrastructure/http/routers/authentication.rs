@@ -44,6 +44,6 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
 
     Router::new()
         .route("/login", post(login))
-        .route("/recover-password", post(recover_password))
+        // .route("/recover-password", post(recover_password))
         .with_state(Arc::new(user_case))
 }

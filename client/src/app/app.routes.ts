@@ -15,7 +15,7 @@ export const routes: Routes = [
     { path: '', component: Home },
     { path: 'login', component: Login },
     // *เพิ่ม
-    { path: 'recover-password', loadComponent: () => import('./recover-password/recover-password').then(m => m.RecoverPassword) },
+    // { path: 'recover-password', loadComponent: () => import('./recover-password/recover-password').then(m => m.RecoverPassword) },
     { path: 'profile', component: Profile, canActivate: [authGuard], runGuardsAndResolvers: 'always' },
     { path: 'missions', component: Missions, canActivate: [authGuard], runGuardsAndResolvers: 'always' },
     // *้เพิ่ม

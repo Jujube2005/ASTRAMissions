@@ -80,16 +80,16 @@ export class PassportService {
     return await this.fetchPassport(api_url, register)
   }
 
-  // *เพิ่ม
-  async recoverPassword(email: string): Promise<null | string> {
-    const api_url = this._base_url + '/authentication/recover-password'
-    try {
-      await firstValueFrom(this._http.post(api_url, { email }))
-      return null
-    } catch (error: any) {
-      return error.error
-    }
-  }
+  // // *เพิ่ม
+  // async recoverPassword(username: string): Promise<null | string> {
+  //   const api_url = this._base_url + '/authentication/recover-password'
+  //   try {
+  //     await firstValueFrom(this._http.post(api_url, { username }))
+  //     return null
+  //   } catch (error: any) {
+  //     return error.error
+  //   }
+  // }
 
   private async fetchPassport(api_url: string, model: LoginModel | RegisterModel): Promise<string | null> {
     try {
