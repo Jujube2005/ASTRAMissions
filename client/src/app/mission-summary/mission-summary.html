@@ -1,0 +1,43 @@
+<div class="summary-container">
+  <h1 class="page-title">Mission Status Summary</h1>
+  
+  @if (summary$ | async; as summary) {
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="card-body">
+        <h2 class="card-title">Created</h2>
+        <p class="stat-value text-primary">{{ summary.created_count }}</p>
+        <p class="stat-desc">Missions you created</p>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-body">
+        <h2 class="card-title">Joined</h2>
+        <p class="stat-value text-secondary">{{ summary.joined_count }}</p>
+        <p class="stat-desc">Missions you joined</p>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-body">
+        <h2 class="card-title">Completed</h2>
+        <p class="stat-value text-success">{{ summary.completed_count }}</p>
+        <p class="stat-desc">Missions completed</p>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-body">
+        <h2 class="card-title">Failed</h2>
+        <p class="stat-value text-error">{{ summary.failed_count }}</p>
+        <p class="stat-desc">Missions failed</p>
+      </div>
+    </div>
+  </div>
+  } @else {
+    <div class="loading-container">
+      <span class="loading-spinner"></span>
+    </div>
+  }
+</div>

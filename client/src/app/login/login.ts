@@ -5,12 +5,12 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
-import { Router } from '@angular/router'
+import { Router, RouterModule } from '@angular/router'
 import { PassportService } from '../_services/passport-service'
 
 @Component({
   selector: 'app-login',
-  imports: [MatCardModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [MatCardModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, RouterModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

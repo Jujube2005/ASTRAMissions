@@ -1,0 +1,11 @@
+<div class="toast-container">
+  <div *ngFor="let n of notifications" class="toast" [ngClass]="n.type">
+    <div class="toast-header">
+      <strong class="me-auto">{{ n.title }}</strong>
+      <button type="button" class="btn-close" (click)="remove(n)">×</button>
+    </div>
+    <div class="toast-body">
+      {{ n.message }}
+    </div>
+  </div>
+</div>

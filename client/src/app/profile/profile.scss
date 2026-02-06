@@ -1,0 +1,120 @@
+.profile-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 3rem;
+
+    .avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #c8aa6e; /* Gold color for LoL theme */
+        margin-bottom: 1rem;
+    }
+
+    .upload-photo button {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        background-color: #0ac8b9;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        
+        &:hover {
+            background-color: #09b3a5;
+        }
+    }
+}
+
+.achievements-section {
+    h3 {
+        color: #f0e6d2; /* LoL Text Color */
+        border-bottom: 1px solid #463714;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .achievements-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .achievement-card {
+        background: #1e2328; /* LoL Dark Background */
+        border: 1px solid #463714;
+        border-radius: 4px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+
+        &.earned {
+            opacity: 1;
+            border-color: #c8aa6e;
+            box-shadow: 0 0 10px rgba(200, 170, 110, 0.2);
+        }
+
+        .icon {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            background: #010a13;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .placeholder-icon {
+                color: #c8aa6e;
+                font-weight: bold;
+                font-size: 1.2rem;
+            }
+        }
+
+        .details {
+            display: flex;
+            flex-direction: column;
+
+            .name {
+                font-weight: bold;
+                color: #f0e6d2;
+            }
+
+            .description {
+                font-size: 0.8rem;
+                color: #a09b8c;
+                margin-top: 0.2rem;
+            }
+
+            .earned-date {
+                font-size: 0.7rem;
+                color: #c8aa6e;
+                margin-top: 0.4rem;
+            }
+
+            .locked-status {
+                font-size: 0.7rem;
+                color: #5c5b57;
+                margin-top: 0.4rem;
+                font-style: italic;
+            }
+        }
+    }
+}

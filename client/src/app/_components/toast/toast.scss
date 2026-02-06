@@ -1,0 +1,76 @@
+.toast-container {
+  position: fixed;
+  top: 80px; /* Below navbar */
+  right: 20px;
+  z-index: 1055;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  background-color: #1e2124; /* Dark discord-like background */
+  color: #dcddde;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  min-width: 300px;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+  border: 1px solid #2f3136;
+
+  &.MissionStatusUpdate {
+    border-left: 4px solid #43b581; /* Green */
+  }
+
+  &.JoinMission {
+    border-left: 4px solid #faa61a; /* Gold/Yellow */
+  }
+
+  &.System {
+    border-left: 4px solid #5865f2; /* Blurple (Discord Blue) */
+  }
+  
+  /* Add more types as needed */
+}
+
+.toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #2f3136;
+  border-bottom: 1px solid #202225;
+  
+  strong {
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    color: #b9bbbe;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.toast-body {
+  padding: 12px;
+  font-size: 0.9rem;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

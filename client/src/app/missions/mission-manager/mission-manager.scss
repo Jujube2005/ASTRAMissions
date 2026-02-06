@@ -69,11 +69,39 @@
 .mission-list .contents {
     background: #fafbfc;
     border-bottom: 1px solid #ececec;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    width: 100%;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .mission-list .contents:hover {
     background: #f0f4f8;
+}
+
+/* Red Dot for Join Alert */
+.red-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #d32f2f;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 4px rgba(211, 47, 47, 0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.mission-list .name {
+    display: flex;
+    align-items: center;
 }
 
 .mission-list .name,
@@ -115,4 +143,15 @@
     }
 }
 
-/* intentionally left empty - restored to original state */
+.alert-join {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.alert-join:hover {
+  background: #b71c1c;
+}

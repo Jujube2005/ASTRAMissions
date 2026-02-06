@@ -22,6 +22,7 @@ export class Missions {
   private _missionsSubject = new BehaviorSubject<Mission[]>([])
   readonly missions$ = this._missionsSubject.asObservable()
   isSignin: Signal<boolean>
+  userId = this._passport.userId
 
   constructor() {
     this.isSignin = computed(() => this._passport.data() !== undefined)
@@ -36,4 +37,25 @@ export class Missions {
   async onSubmit() {
     this.loadMyMission()
   }
+
+  // *เพิ่ม
+  async joinMission(mission_id: number) {
+    try {
+      await this._mission.joinMission(mission_id)
+      await this.loadMyMission()
+    } catch (e: any) {
+      alert(e?.error?.message ?? 'Join failed')
+    }
+  }
+
+  // *เพิ่ม
+  // async leaveMission(mission_id: number) {
+  //   if (!confirm('Are you sure you want to leave this mission?')) return
+  //   try {
+  //     await this._mission.leaveMission(mission_id)
+  //     await this.loadMyMission()
+  //   } catch (e: any) {
+  //     alert(e?.error?.message ?? 'Leave failed')
+  //   }
+  // }
 }

@@ -1,0 +1,51 @@
+  // *เพิ่ม 
+
+.mission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 0.5rem 0 1rem 0;
+    overflow-x: auto;
+}
+
+.mission-list .header,
+.mission-list .contents {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+.mission-list .header {
+    background: #f5f7fa;
+    font-weight: 500;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+    border-radius: 12px 12px 0 0;
+}
+
+.mission-list .contents {
+    background: #fafbfc;
+    border-bottom: 1px solid #ececec;
+    transition: background 0.2s;
+}
+
+.mission-list .contents:hover {
+    background: #f0f4f8;
+}
+
+.actions button.warn {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.actions button.warn:hover {
+    background: #b71c1c;
+}

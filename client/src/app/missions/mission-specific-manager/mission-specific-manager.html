@@ -1,0 +1,60 @@
+<div class="loading" *ngIf="isLoading">
+    <p>Loading mission details...</p>
+</div>
+
+<div class="error-container" *ngIf="error">
+    <p class="error-msg">{{error}}</p>
+    <div class="actions">
+        <button (click)="loadData()">Retry</button>
+        <button (click)="goBack()">Back</button>
+    </div>
+</div>
+
+<div class="container" *ngIf="mission && !isLoading && !error">
+    <div class="header">
+        <button (click)="goBack()">Back</button>
+        <h2>Mission Manager</h2>
+    </div>
+
+    <div class="mission-details">
+        <div *ngIf="!isEditing">
+            <h3>{{mission.name}} <span class="badge" [class]="mission.status">{{mission.status}}</span></h3>
+            <p>{{mission.description}}</p>
+            <div class="actions" *ngIf="mission.status !== 'Completed'">
+                <button (click)="toggleEdit()">Edit Details</button>
+                <button (click)="deleteMission()" class="danger">Delete Mission</button>
+            </div>
+        </div>
+
+        <div *ngIf="isEditing" class="edit-form">
+            <input [(ngModel)]="editName" placeholder="Mission Name" />
+            <textarea [(ngModel)]="editDescription" placeholder="Description"></textarea>
+            <div class="form-actions">
+                <button (click)="saveEdit()">Save</button>
+                <button (click)="toggleEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mission-controls">
+        <button *ngIf="(mission.status === 'Open' || mission.status === 'Failed') && crew.length > 0" (click)="startMission()" class="primary">Start Mission</button>
+        <button *ngIf="mission.status === 'InProgress'" (click)="completeMission()" class="success">Complete Mission</button>
+    </div>
+
+    <div class="crew-section">
+        <h3>Crew Members ({{crew.length}})</h3>
+        <div class="crew-list">
+            <div class="crew-item" *ngFor="let member of crew">
+                <div class="info">
+                    <img [src]="member.avatar_url || 'https://via.placeholder.com/40'" alt="Avatar" class="avatar">
+                    <span>{{member.display_name}}</span>
+                </div>
+                <div class="actions" *ngIf="mission.status !== 'Completed'">
+                    <button (click)="kick(member.id)" class="warn">Kick</button>
+                    <button (click)="makeChief(member.id)">Make Chief</button>
+                </div>
+            </div>
+            <div *ngIf="crew.length === 0" class="empty">No crew members yet.</div>
+        </div>
+    </div>
+</div>

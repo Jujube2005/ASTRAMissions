@@ -5,6 +5,7 @@ import { PassportService } from './passport-service'
 import { fileToBase64 } from '../_helpers/file'
 import { firstValueFrom } from 'rxjs'
 import { CloudinaryImage } from '../_models/cludinary-image'
+import { Brawler } from '../_models/brawler'
 
 @Injectable({
   providedIn: 'root',
@@ -28,5 +29,11 @@ export class UserService {
       return error.error as string
     }
     return null
+  }
+
+  // *เพิ่ม
+  async getLeaderboard(): Promise<Brawler[]> {
+    const url = this._base_url + '/leaderboard'
+    return await firstValueFrom(this._http.get<Brawler[]>(url))
   }
 }

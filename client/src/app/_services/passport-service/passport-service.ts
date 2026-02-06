@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal } from "@angular/core";
 import { environment } from "../../../environments/environment.development";
-import { LoginModel, Passport, RegisterModel } from "../../_models/brawler/passport";
+import { LoginModel, Passport, RegisterModel } from "../../_models/passport";
 import { catchError, firstValueFrom, throwError } from "rxjs";
 
 @Injectable({

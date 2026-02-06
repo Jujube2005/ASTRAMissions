@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { inject, Injectable, signal } from '@angular/core'
+import { inject, Injectable, signal, computed } from '@angular/core'
 import { environment } from '../../environments/environment' ///
 import { LoginModel, Passport, RegisterModel } from '../_models/passport'
 import { firstValueFrom } from 'rxjs'
@@ -16,6 +16,18 @@ export class PassportService {
 
   data = signal<undefined | Passport>(undefined)
   avatar = signal<string>("")
+  
+  // *เพิ่ม
+  userId = computed(() => {
+    const token = this.data()?.token
+    if (!token) return undefined
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return Number(payload.sub)
+    } catch {
+      return undefined
+    }
+  })
 
   saveAvatarImgUrl(url: string) {
     let passport = this.data()
@@ -66,6 +78,17 @@ export class PassportService {
   async register(register: RegisterModel): Promise<null | string> {
     const api_url = this._base_url + '/brawler/register'
     return await this.fetchPassport(api_url, register)
+  }
+
+  // *เพิ่ม
+  async recoverPassword(email: string): Promise<null | string> {
+    const api_url = this._base_url + '/authentication/recover-password'
+    try {
+      await firstValueFrom(this._http.post(api_url, { email }))
+      return null
+    } catch (error: any) {
+      return error.error
+    }
   }
 
   private async fetchPassport(api_url: string, model: LoginModel | RegisterModel): Promise<string | null> {

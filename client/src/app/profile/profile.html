@@ -1,7 +1,37 @@
-<p>profile works!</p>
+<div class="profile-container">
+    <div class="profile-header">
+        <img src="{{avatar_url()}}" alt="user-avatar" class="avatar">
+        <div class="upload-photo">
+            <button (click)="openDialog()">Change Avatar</button>
+        </div>
+    </div>
 
-<img src="{{avatar_url()}}" alt="user-avatar">
-
-<div class="upload-photo">
-    <button (click)="openDialog()">new Avatar</button>
+    <div class="achievements-section">
+        <h3>Achievements</h3>
+        <div class="achievements-list">
+            @for (achievement of achievements; track achievement.id) {
+                <div class="achievement-card" [class.earned]="achievement.is_earned">
+                    <div class="icon">
+                        @if (achievement.icon_url && !achievement.icon_url.startsWith('assets/')) {
+                             <img [src]="achievement.icon_url" [alt]="achievement.name">
+                        } @else {
+                             <!-- Fallback/Placeholder if no real image -->
+                             <div class="placeholder-icon">{{ achievement.name.charAt(0) }}</div>
+                        }
+                    </div>
+                    <div class="details">
+                        <span class="name">{{ achievement.name }}</span>
+                        <span class="description">{{ achievement.description }}</span>
+                        @if (achievement.is_earned) {
+                            <span class="earned-date">Earned on {{ achievement.earned_at | date:'mediumDate' }}</span>
+                        } @else {
+                            <span class="locked-status">Locked</span>
+                        }
+                    </div>
+                </div>
+            } @empty {
+                <p>No achievements available.</p>
+            }
+        </div>
+    </div>
 </div>

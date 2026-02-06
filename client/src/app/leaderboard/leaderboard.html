@@ -1,0 +1,22 @@
+<div class="leaderboard-container">
+    <h1>Leaderboard</h1>
+    <div class="leaderboard-table">
+        <div class="header-row">
+            <div class="col rank">Rank</div>
+            <div class="col player">Brawler</div>
+            <div class="col stats">Success Missions</div>
+        </div>
+        <div class="row" *ngFor="let player of (leaderboard$ | async); let i = index">
+            <div class="col rank">
+                <span class="rank-number">#{{ i + 1 }}</span>
+            </div>
+            <div class="col player">
+                <img [src]="player.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar" class="avatar">
+                <span class="name">{{ player.display_name }}</span>
+            </div>
+            <div class="col stats">
+                <span class="count">{{ player.mission_success_count }}</span>
+            </div>
+        </div>
+    </div>
+</div>

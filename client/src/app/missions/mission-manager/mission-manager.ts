@@ -8,6 +8,8 @@ import { MatIconModule } from '@angular/material/icon'
 import { AsyncPipe, DatePipe } from '@angular/common'
 import { BehaviorSubject } from 'rxjs'
 import { PassportService } from '../../_services/passport-service'
+import { NotificationService } from '../../_services/notification-service'
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-mission-manager',
@@ -21,14 +23,35 @@ export class MissionManager {
   private _passport = inject(PassportService)
   private _missionsSubject = new BehaviorSubject<Mission[]>([])
   readonly myMissions$ = this._missionsSubject.asObservable()
+  private _notification = inject(NotificationService)
+  private _router = inject(Router)
+  joinAlerts = new Set<number>()
 
   constructor() {
     this.loadMyMission()
+    this._notification.notifications$.subscribe(n => {
+      if (n.type === 'JoinMission' && n.metadata?.mission_id) {
+        this.joinAlerts.add(Number(n.metadata.mission_id))
+      }
+    })
   }
 
   private async loadMyMission() {
     const missions = await this._mission.getMyMissions()
     this._missionsSubject.next(missions)
+  }
+
+  navigateToMission(id: number) {
+    this.joinAlerts.delete(id)
+    this._router.navigate(['/chief/mission', id])
+  }
+
+  hasJoinAlert(id: number) {
+    return this.joinAlerts.has(id)
+  }
+  
+  clearJoinAlert(id: number) {
+      this.joinAlerts.delete(id)
   }
 
   openDialog() {
@@ -56,4 +79,70 @@ export class MissionManager {
     })
   }
 
+  // *เพิ่ม
+  openEditDialog(mission: Mission) {
+    const ref = this._dialog.open(NewMission, {
+      data: { name: mission.name, description: mission.description }
+    })
+    ref.afterClosed().subscribe(async (updatedData: AddMission) => {
+      if (updatedData) {
+        try {
+          await this._mission.edit(mission.id, updatedData)
+          // Update local state
+          const currentMissions = this._missionsSubject.value
+          const index = currentMissions.findIndex(m => m.id === mission.id)
+          if (index !== -1) {
+            currentMissions[index] = { ...currentMissions[index], ...updatedData }
+            this._missionsSubject.next([...currentMissions])
+          }
+        } catch (e: any) {
+          alert(e?.error?.message ?? e?.error ?? 'Edit failed')
+        }
+      }
+    })
+  }
+
+  // *เพิ่ม
+  async deleteMission(mission_id: number) {
+    if (!confirm('Are you sure you want to delete this mission?')) return
+
+    try {
+      await this._mission.delete(mission_id)
+      // Update local state
+      const currentMissions = this._missionsSubject.value.filter(m => m.id !== mission_id)
+      this._missionsSubject.next(currentMissions)
+    } catch (e: any) {
+      alert(e?.error?.message ?? e?.error ?? 'Delete failed')
+    }
+  }
+
+  // hasJoinAlert(mission_id: number): boolean {
+  //   return this.joinAlerts.has(mission_id)
+  // }
+
+  // clearJoinAlert(mission_id: number) {
+  //   this.joinAlerts.delete(mission_id)
+  // }
+
+  // *เพิ่ม
+  async startMission(mission_id: number) {
+    if (!confirm('Start this mission?')) return
+    try {
+      await this._mission.startMission(mission_id)
+      await this.loadMyMission()
+    } catch (e: any) {
+      alert(e?.error?.message ?? e?.error ?? 'Start mission failed')
+    }
+  }
+
+  // *เพิ่ม
+  async completeMission(mission_id: number) {
+    if (!confirm('Complete this mission?')) return
+    try {
+      await this._mission.completeMission(mission_id)
+      await this.loadMyMission()
+    } catch (e: any) {
+      alert(e?.error?.message ?? e?.error ?? 'Complete mission failed')
+    }
+  }
 }

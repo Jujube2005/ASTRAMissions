@@ -50,14 +50,21 @@
                 </mat-form-field>
                 }
 
-                <button (click)="onSubmit()" type="submit" class="blue" matButton="outlined" [disabled]="!form.valid">
+                <div class="actions">
+                    <button (click)="onSubmit()" type="submit" class="blue" matButton="outlined" [disabled]="!form.valid">
+                        @if(mode==='login'){
+                        Login
+                        }
+                        @if(mode!=='login'){
+                        Get Start
+                        }
+                    </button>
+                    
                     @if(mode==='login'){
-                    Login
+                    <a routerLink="/recover-password" class="forgot-password">Forgot Password?</a>
                     }
-                    @if(mode!=='login'){
-                    Get Start
-                    }
-                </button>
+                </div>
+
                 @if (errorMsg.server() !== '') {
                 <span class="error">{{errorMsg.server()}}</span>
                 }

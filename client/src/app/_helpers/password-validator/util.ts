@@ -1,4 +1,4 @@
-import { Passport } from "../../_models/brawler/passport"
+import { Passport } from "../../_models/passport"
 
 const _default_avatar =  '/assets/default.avatar.jpg'
 
