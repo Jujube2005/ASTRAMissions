@@ -1,8 +1,12 @@
 use crate::domain::{
-    entities::{crew_memberships::CrewMemberShips, notification::{Notification, NotificationType}},
+    entities::{
+        crew_memberships::CrewMemberShips, 
+        notification::{Notification, NotificationType},
+        mission_messages::NewMissionMessageEntity,
+    },
     repositories::{
         crew_operation::CrewOperationRepository, mission_viewing::MissionViewingRepository,
-        AchievementRepository, BrawlerRepository,
+        AchievementRepository, BrawlerRepository, mission_message_repository::MissionMessageRepository,
     },
     services::notification_service::NotificationService,
     value_objects::mission_statuses::MissionStatuses,
@@ -10,41 +14,76 @@ use crate::domain::{
 use anyhow::Result;
 use std::sync::Arc;
 
-pub struct CrewOperationUseCase<T1, T2, T3, T4>
+
+use crate::application::services::mission_realtime::{MissionRealtimeService, ChatMessage};
+
+pub struct CrewOperationUseCase<T1, T2, T3, T4, T5>
 where
     T1: CrewOperationRepository + Send + Sync,
     T2: MissionViewingRepository + Send + Sync,
     T3: AchievementRepository + Send + Sync,
     T4: BrawlerRepository + Send + Sync,
+    T5: MissionMessageRepository + Send + Sync,
 {
     crew_operation_repository: Arc<T1>,
     mission_viewing_repository: Arc<T2>,
     achievement_repository: Arc<T3>,
     brawler_repository: Arc<T4>,
+    mission_message_repository: Arc<T5>,
     notification_service: Arc<dyn NotificationService>,
+    realtime_service: Arc<MissionRealtimeService>,
 }
 
-impl<T1, T2, T3, T4> CrewOperationUseCase<T1, T2, T3, T4>
+impl<T1, T2, T3, T4, T5> CrewOperationUseCase<T1, T2, T3, T4, T5>
 where
     T1: CrewOperationRepository + Send + Sync + 'static,
     T2: MissionViewingRepository + Send + Sync,
     T3: AchievementRepository + Send + Sync,
     T4: BrawlerRepository + Send + Sync,
+    T5: MissionMessageRepository + Send + Sync,
 {
     pub fn new(
         crew_operation_repository: Arc<T1>, 
         mission_viewing_repository: Arc<T2>,
         achievement_repository: Arc<T3>,
         brawler_repository: Arc<T4>,
+        mission_message_repository: Arc<T5>,
         notification_service: Arc<dyn NotificationService>,
+        realtime_service: Arc<MissionRealtimeService>,
     ) -> Self {
         Self {
             crew_operation_repository,
             mission_viewing_repository,
             achievement_repository,
             brawler_repository,
+            mission_message_repository,
             notification_service,
+            realtime_service,
         }
+    }
+    
+    async fn log_and_broadcast_system_message(&self, mission_id: i32, content: String) {
+        let entity = NewMissionMessageEntity {
+            mission_id,
+            user_id: None,
+            content: content.clone(),
+            type_: "system".to_string(),
+        };
+
+        // Persist
+        let _ = self.mission_message_repository.create(entity).await;
+
+        // Broadcast
+        let msg = ChatMessage {
+            mission_id,
+            user_id: None,
+            user_display_name: None,
+            user_avatar_url: None,
+            content,
+            type_: "system".to_string(),
+            created_at: chrono::Utc::now().to_rfc3339(),
+        };
+        self.realtime_service.broadcast(mission_id, msg);
     }
 
     pub async fn join(&self, mission_id: i32, brawler_id: i32) -> Result<()> {
@@ -104,21 +143,44 @@ where
         };
         let _ = self.notification_service.send(notification).await;
 
-        // Check Achievements
+        // Check Achievements AND Broadcast
         if let Ok(brawler) = self.brawler_repository.find_by_id(brawler_id).await {
-            let _ = self.achievement_repository.check_and_award(brawler_id, "mission_join", brawler.mission_join_count).await;
+            // Log for debug
+            println!("DEBUG: Brawler {} join_count is {}", brawler.display_name, brawler.mission_join_count);
+
+            if let Ok(awarded) = self.achievement_repository.check_and_award(brawler_id, "mission_join", brawler.mission_join_count).await {
+                for name in awarded {
+                    self.log_and_broadcast_system_message(mission_id, format!("{} earned achievement: {}", brawler.display_name, name)).await;
+                }
+            }
+            
+            // Broadcast join
+            self.log_and_broadcast_system_message(mission_id, format!("{} joined the mission", brawler.display_name)).await;
+        } else {
+             self.log_and_broadcast_system_message(mission_id, "A new member joined the mission".to_string()).await;
         }
 
         Ok(())
     }
 
     pub async fn leave(&self, mission_id: i32, brawler_id: i32) -> Result<()> {
-        self.crew_operation_repository
+        let result = self.crew_operation_repository
             .leave(CrewMemberShips {
                 mission_id,
                 brawler_id,
             })
-            .await
+            .await;
+            
+        // Broadcast leave
+        if result.is_ok() {
+             if let Ok(brawler) = self.brawler_repository.find_by_id(brawler_id).await {
+                self.log_and_broadcast_system_message(mission_id, format!("{} left the mission", brawler.display_name)).await;
+            } else {
+                self.log_and_broadcast_system_message(mission_id, "A member left the mission".to_string()).await;
+            }
+        }
+        
+        result
     }
 
     pub async fn kick_crew(&self, mission_id: i32, chief_id: i32, member_id: i32) -> Result<()> {
@@ -144,6 +206,13 @@ where
             metadata: serde_json::json!({ "mission_id": mission_id }),
         };
         let _ = self.notification_service.send(notification).await;
+
+        // Broadcast kick
+         if let Ok(brawler) = self.brawler_repository.find_by_id(member_id).await {
+            self.log_and_broadcast_system_message(mission_id, format!("{} was kicked from the mission", brawler.display_name)).await;
+        } else {
+            self.log_and_broadcast_system_message(mission_id, "A member was kicked from the mission".to_string()).await;
+        }
 
         Ok(())
     }

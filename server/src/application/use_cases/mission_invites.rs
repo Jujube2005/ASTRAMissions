@@ -16,6 +16,8 @@ use crate::domain::{
 use anyhow::{anyhow, Result};
 use std::sync::Arc;
 
+use crate::application::services::mission_realtime::{MissionRealtimeService, ChatMessage};
+
 pub struct MissionInviteUseCase {
     invite_repo: Arc<dyn MissionInviteRepository>,
     mission_repo: Arc<dyn MissionViewingRepository>,
@@ -23,6 +25,7 @@ pub struct MissionInviteUseCase {
     brawler_repo: Arc<dyn BrawlerRepository>,
     message_repo: Arc<dyn MissionMessageRepository>,
     achievement_repo: Arc<dyn AchievementRepository>,
+    realtime_service: Arc<MissionRealtimeService>,
 }
 
 impl MissionInviteUseCase {
@@ -33,6 +36,7 @@ impl MissionInviteUseCase {
         brawler_repo: Arc<dyn BrawlerRepository>,
         message_repo: Arc<dyn MissionMessageRepository>,
         achievement_repo: Arc<dyn AchievementRepository>,
+        realtime_service: Arc<MissionRealtimeService>,
     ) -> Self {
         Self {
             invite_repo,
@@ -41,7 +45,21 @@ impl MissionInviteUseCase {
             brawler_repo,
             message_repo,
             achievement_repo,
+            realtime_service,
         }
+    }
+
+    fn broadcast_system_message(&self, mission_id: i32, content: String) {
+        let msg = ChatMessage {
+            mission_id,
+            user_id: None,
+            user_display_name: None,
+            user_avatar_url: None,
+            content,
+            type_: "system".to_string(),
+            created_at: chrono::Utc::now().to_rfc3339(),
+        };
+        self.realtime_service.broadcast(mission_id, msg);
     }
 
     pub async fn invite(&self, mission_id: i32, inviter_id: i32, user_id: i32) -> Result<MissionInvite> {
@@ -61,6 +79,11 @@ impl MissionInviteUseCase {
             user_id,
             status: "pending".to_string(),
         }).await?;
+
+        // Broadcast invite if needed
+        if let Ok(brawler) = self.brawler_repo.find_by_id(user_id).await {
+            self.broadcast_system_message(mission_id, format!("{} was invited to the mission", brawler.username));
+        }
 
         Ok(invite)
     }
@@ -98,13 +121,17 @@ impl MissionInviteUseCase {
 
         // System Message
         let brawler = self.brawler_repo.find_by_id(user_id).await?; // Assuming it returns BrawlerEntity directly on success
+        let msg_content = format!("{} joined the mission via invite", brawler.username);
         let msg = NewMissionMessageEntity {
             mission_id: invite.mission_id,
             user_id: None,
-            content: format!("{} joined the mission via invite", brawler.username),
+            content: msg_content.clone(),
             type_: "system".to_string(),
         };
         self.message_repo.create(msg).await?;
+
+        // Broadcast accept
+        self.broadcast_system_message(invite.mission_id, msg_content);
 
         Ok(())
     }

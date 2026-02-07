@@ -24,7 +24,8 @@ use crate::{
     infrastructure::{
         database::postgresql_connection::PgPoolSquad,
         http::routers::{self},
-    services::{notification_service::NotificationServiceImpl, mission_websocket_service::MissionWebSocketService}},
+        services::{notification_service::NotificationServiceImpl}},
+    application::services::mission_realtime::MissionRealtimeService,
 };
 
 
@@ -33,7 +34,7 @@ fn api_serve(
     db_pool: Arc<PgPoolSquad>,
     notification_service: Arc<dyn NotificationService>,
     tx: broadcast::Sender<Notification>,
-    mission_ws_service: Arc<MissionWebSocketService>,
+    realtime_service: Arc<MissionRealtimeService>,
 ) -> Router {
     Router::new()
         .nest("/brawler", routers::brawlers::routes(Arc::clone(&db_pool)))
@@ -43,22 +44,20 @@ fn api_serve(
         )
         .nest(
             "/mission",
-            routers::mission_operation::routes(Arc::clone(&db_pool), Arc::clone(&notification_service))
-                .layer(Extension(Arc::clone(&mission_ws_service))),
+            routers::mission_operation::routes(Arc::clone(&db_pool), Arc::clone(&notification_service), Arc::clone(&realtime_service))
         )
         .nest(
             "/crew",
-            routers::crew_operation::routes(Arc::clone(&db_pool), Arc::clone(&notification_service))
-                .layer(Extension(Arc::clone(&mission_ws_service))),
+            routers::crew_operation::routes(Arc::clone(&db_pool), Arc::clone(&notification_service), Arc::clone(&realtime_service))
         )
         .nest(
             "/mission-chat",
-            routers::mission_chat::routes(Arc::clone(&db_pool)),
+            routers::mission_chat::routes(Arc::clone(&db_pool), Arc::clone(&realtime_service)),
         )
         .nest(
             "/ws/mission",
             routers::mission_ws::routes(Arc::clone(&db_pool))
-                .layer(Extension(mission_ws_service)),
+                .layer(Extension(realtime_service.clone())),
         )
         .nest(
             "/mission-management",
@@ -78,7 +77,7 @@ fn api_serve(
         )
         .nest(
             "/mission-invites",
-            routers::mission_invites::routes(Arc::clone(&db_pool)),
+            routers::mission_invites::routes(Arc::clone(&db_pool), Arc::clone(&realtime_service)),
         )
         .nest("/util", routers::default_router::routes())
         .fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
@@ -87,13 +86,13 @@ fn api_serve(
 pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Result<()> {
     let (tx, _rx) = broadcast::channel(100);
     let notification_svc: Arc<dyn NotificationService> = Arc::new(NotificationServiceImpl::new(tx.clone()));
-    let mission_ws_svc = Arc::new(MissionWebSocketService::new());
+    let realtime_svc = Arc::new(MissionRealtimeService::new());
 
     let dir = "statics";
     let static_service = ServeDir::new(dir).not_found_service(ServeFile::new(format!("{dir}/index.html")));
 
     let app = Router::new()
-        .nest("/api", api_serve(db_pool, notification_svc, tx, mission_ws_svc))
+        .nest("/api", api_serve(db_pool, notification_svc, tx, realtime_svc))
         .fallback_service(static_service)
         .layer(tower_http::timeout::TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
@@ -111,6 +110,7 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
                     Method::PATCH,
                     Method::DELETE,
                     Method::OPTIONS,
+                    Method::HEAD,
                 ])
                 .allow_origin(Any)
                 .allow_headers([AUTHORIZATION, CONTENT_TYPE]),

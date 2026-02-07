@@ -53,9 +53,11 @@ where
     }
 }
 
-pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
+use crate::application::services::mission_realtime::MissionRealtimeService;
+
+pub fn routes(db_pool: Arc<PgPoolSquad>, realtime_service: Arc<MissionRealtimeService>) -> Router {
     let repository = MissionMessagePostgres::new(Arc::clone(&db_pool));
-    let use_case = MissionChatUseCase::new(Arc::new(repository));
+    let use_case = MissionChatUseCase::new(Arc::new(repository), realtime_service);
 
     Router::new()
         .route("/:mission_id/messages", get(get_messages::<MissionMessagePostgres>))

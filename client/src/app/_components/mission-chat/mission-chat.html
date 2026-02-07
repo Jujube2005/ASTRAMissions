@@ -1,8 +1,14 @@
 <div class="chat-container">
+    <div class="tabs">
+        <button [class.active]="filter === 'all'" (click)="filter = 'all'">All</button>
+        <button [class.active]="filter === 'chat'" (click)="filter = 'chat'">Chat</button>
+        <button [class.active]="filter === 'activity'" (click)="filter = 'activity'">Activity</button>
+    </div>
+
     <div class="messages-list">
         <div *ngIf="loadingMessages" class="text-center p-2 text-gray-500">Loading messages...</div>
 
-        <div *ngFor="let msg of messages" class="message"
+        <div *ngFor="let msg of filteredMessages" class="message"
             [ngClass]="{'system': msg.type_ === 'system', 'chat': msg.type_ === 'chat'}">
 
             <div *ngIf="msg.type_ === 'chat'" class="sender-name">
@@ -18,12 +24,12 @@
             </div>
         </div>
 
-        <div *ngIf="!loadingMessages && messages.length === 0" class="text-center p-4 text-gray-500">
-            No messages yet. Start the conversation!
+        <div *ngIf="!loadingMessages && filteredMessages.length === 0" class="text-center p-4 text-gray-500">
+            No messages found.
         </div>
     </div>
 
-    <div class="input-area">
+    <div class="input-area" *ngIf="filter !== 'activity'">
         <input type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
             [disabled]="sendingMessage">
         <button (click)="sendMessage()" [disabled]="!newMessage.trim() || sendingMessage">

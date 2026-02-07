@@ -78,7 +78,9 @@ async fn get_my_invites(
     }
 }
 
-pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
+use crate::application::services::mission_realtime::MissionRealtimeService;
+
+pub fn routes(db_pool: Arc<PgPoolSquad>, realtime_service: Arc<MissionRealtimeService>) -> Router {
     let invite_repo = Arc::new(MissionInvitePostgres::new(Arc::clone(&db_pool)));
     let mission_repo = Arc::new(MissionViewingPostgres::new(Arc::clone(&db_pool)));
     let crew_repo = Arc::new(CrewOperationPostgres::new(Arc::clone(&db_pool)));
@@ -93,6 +95,7 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
         brawler_repo,
         message_repo,
         achievement_repo,
+        realtime_service,
     ));
 
     Router::new()
