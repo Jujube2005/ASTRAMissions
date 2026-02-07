@@ -58,8 +58,8 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let use_case = MissionChatUseCase::new(Arc::new(repository));
 
     Router::new()
-        .route("/{mission_id}/messages", get(get_messages::<MissionMessagePostgres>))
-        .route("/{mission_id}/messages", post(send_message::<MissionMessagePostgres>))
+        .route("/:mission_id/messages", get(get_messages::<MissionMessagePostgres>))
+        .route("/:mission_id/messages", post(send_message::<MissionMessagePostgres>))
         .route_layer(middleware::from_fn(auth))
         .with_state(Arc::new(use_case))
 }

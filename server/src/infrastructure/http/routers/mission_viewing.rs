@@ -85,10 +85,10 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let user_case = MissionViewingUseCase::new(Arc::new(viewing_repositiory));
 
     Router::new()
-        .route("/filter", get(get_all))
-        .route("/joined", get(get_joined))
-        .route("/crew/{mission_id}", get(get_crew))
-        .route("/{mission_id}", get(get_one))
+        .route("/filter", get(get_all::<MissionViewingPostgres>))
+        .route("/joined", get(get_joined::<MissionViewingPostgres>))
+        .route("/crew/:mission_id", get(get_crew::<MissionViewingPostgres>))
+        .route("/:mission_id", get(get_one::<MissionViewingPostgres>))
         .route_layer(middleware::from_fn(auth))
         .with_state(Arc::new(user_case))
 }
