@@ -1,3 +1,4 @@
 export const environment = {
-    baseUrl: `http://localhost:8000`
-}
+    production: true,
+    baseUrl: 'https://astra-api-web.onrender.com' 
+};
