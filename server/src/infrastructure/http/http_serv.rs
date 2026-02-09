@@ -9,7 +9,7 @@ use axum::{
 };
 use tokio::{net::TcpListener, sync::broadcast};
 use tower_http::{
-    cors::{Any, CorsLayer},
+    cors::{CorsLayer, AllowOrigin},
     limit::RequestBodyLimitLayer,
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -112,7 +112,8 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
                     Method::OPTIONS,
                     Method::HEAD,
                 ])
-                .allow_origin(Any)
+                .allow_origin(AllowOrigin::predicate(|_origin, _request_head| true))
+                .allow_credentials(true)
                 .allow_headers([AUTHORIZATION, CONTENT_TYPE]),
         )
         .layer(TraceLayer::new_for_http());
