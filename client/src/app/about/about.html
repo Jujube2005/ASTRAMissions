@@ -1,0 +1,124 @@
+<div class="about-page">
+    <div class="max-w-6xl mx-auto px-6 py-20 relative">
+        <!-- Floating Elements -->
+        <div class="absolute top-[20%] left-[10%] w-2 h-2 bg-purple-500 rounded-full blur-[2px] animate-pulse"></div>
+        <div class="absolute bottom-[30%] right-[15%] w-3 h-3 bg-blue-500 rounded-full blur-[2px] animate-bounce"></div>
+
+        <div class="text-center mb-16 space-y-4">
+            <h1
+                class="text-5xl md:text-7xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(124,58,237,0.5)]">
+                MISSION <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">CONTROL</span>
+            </h1>
+            <p class="text-gray-400 text-lg tracking-[0.2em] uppercase">Development Team & Project Architects</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+
+            <!-- Left: 3D Card / Profile -->
+            <div class="flex justify-center perspective-1000 animate-float">
+                <div class="profile-card p-10 max-w-md w-full relative group" [appThreeDTilt]="15">
+                    <!-- Tech Corners -->
+                    <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-purple-500/50 rounded-tl-xl">
+                    </div>
+                    <div
+                        class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-purple-500/50 rounded-tr-xl">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-purple-500/50 rounded-bl-xl">
+                    </div>
+                    <div
+                        class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-purple-500/50 rounded-br-xl">
+                    </div>
+
+                    <div class="profile-img-container mb-8">
+                        <!-- Placeholder for user image, utilizing dicebear for consistency if no real image -->
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Chotika" alt="Chotika Jakchai"
+                            class="profile-img">
+                        <div
+                            class="absolute bottom-2 right-4 w-6 h-6 bg-green-500 rounded-full border-4 border-[#0f0714] z-10">
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold text-white mb-2">Chotika Jakchai</h2>
+                        <p class="project-id">67162110078-5</p>
+                        <p class="text-purple-400 font-bold uppercase tracking-widest text-sm mb-6">Lead Developer /
+                            Student</p>
+
+                        <div
+                            class="h-px w-3/4 mx-auto bg-gradient-to-r from-transparent via-gray-700 to-transparent mb-6">
+                        </div>
+
+                        <div class="space-y-4 text-left px-4">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-400 uppercase tracking-wider">Department</span>
+                                <span class="text-white font-bold">Computer Science</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-400 uppercase tracking-wider">Status</span>
+                                <span
+                                    class="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">ONLINE</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-400 uppercase tracking-wider">Objective</span>
+                                <span class="text-white font-bold">Web Application Dev</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex justify-center gap-3">
+                            <span
+                                class="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs text-purple-300">ANGULAR</span>
+                            <span
+                                class="px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded text-xs text-blue-300">TYPESCRIPT</span>
+                            <span
+                                class="px-3 py-1 bg-pink-500/10 border border-pink-500/30 rounded text-xs text-pink-300">TAILWIND</span>
+                        </div>
+                        <div class="mt-3 flex justify-center gap-3">
+                            <span
+                                class="px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-xs text-orange-300">RUST</span>
+                            <span
+                                class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs text-emerald-300">AXUM</span>
+                            <span
+                                class="px-3 py-1 bg-sky-500/10 border border-sky-500/30 rounded text-xs text-sky-300">POSTGRESQL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Project Info -->
+            <div class="space-y-8 text-left animate-float-delayed">
+                <div
+                    class="bg-white/5 backdrop-blur-sm p-8 rounded-3xl border border-white/10 hover:border-purple-500/30 transition-colors">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-3">
+                        <span class="w-2 h-8 bg-purple-500 rounded-full"></span>
+                        ABOUT THE PROJECT
+                    </h3>
+                    <p class="text-gray-400 leading-relaxed custom-scrollbar">
+                        Designed with a futuristic "Astra" aesthetic, this platform integrates advanced mission control
+                        interfaces,
+                        real-time data synchronization, and interactive 3D elements. Built as part of the Web
+                        Application Development curriculum.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10 text-center">
+                        <div class="text-4xl font-black text-white mb-2">100%</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-widest">Performance</div>
+                    </div>
+                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10 text-center">
+                        <div class="text-4xl font-black text-white mb-2">A+</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-widest">Target Grade</div>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <p class="text-sm text-center text-gray-500 uppercase tracking-[0.2em]">Authorized Access Only //
+                        ID: 67162110078-5</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

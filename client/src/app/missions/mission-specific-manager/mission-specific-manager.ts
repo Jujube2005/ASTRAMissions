@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core'
+import { Component, inject, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MissionService } from '../../_services/mission-service'
 import { Mission } from '../../_models/mission'
@@ -6,17 +6,23 @@ import { CommonModule, Location } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { PassportService } from '../../_services/passport-service'
 import { MissionChatComponent } from '../../_components/mission-chat/mission-chat'
-import { MatDialog } from '@angular/material/dialog'
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 import { InviteMemberComponent } from '../../_dialogs/invite-member/invite-member'
+import { MatIconModule } from '@angular/material/icon'
+import { ThreeDTiltDirective } from '../../_directives/three-d-tilt.directive'
+import { MissionSocketService } from '../../_services/mission-socket.service'
+import { MatSnackBar } from '@angular/material/snack-bar'
+import { Subject, takeUntil } from 'rxjs'
+import { ConfirmationDialogComponent } from '../../_dialogs/confirmation-dialog/confirmation-dialog'
 
 @Component({
   selector: 'app-mission-specific-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, MissionChatComponent],
+  imports: [CommonModule, FormsModule, MissionChatComponent, MatIconModule, MatDialogModule, ThreeDTiltDirective],
   templateUrl: './mission-specific-manager.html',
   styleUrl: './mission-specific-manager.scss',
 })
-export class MissionSpecificManager implements OnInit {
+export class MissionSpecificManager implements OnInit, OnDestroy {
   private _route = inject(ActivatedRoute)
   private _router = inject(Router)
   private _missionService = inject(MissionService)
@@ -42,11 +48,29 @@ export class MissionSpecificManager implements OnInit {
     return !!(this.mission && userId && this.mission.chief_id === userId)
   }
 
+  private _socketService = inject(MissionSocketService)
+  private _snackBar = inject(MatSnackBar)
+  private _destroy$ = new Subject<void>()
+
   async ngOnInit() {
     this.missionId = Number(this._route.snapshot.paramMap.get('id'))
     if (this.missionId) {
       await this.loadData()
+
+      this._socketService.messages$
+        .pipe(takeUntil(this._destroy$))
+        .subscribe(msg => {
+          if (msg.mission_id === this.missionId && msg.type_ === 'system') {
+            // Reload data on system messages (join/leave/status change)
+            this.loadData();
+          }
+        });
     }
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   async loadData() {
@@ -74,6 +98,7 @@ export class MissionSpecificManager implements OnInit {
 
       this.editName = this.mission.name
       this.editDescription = this.mission.description || ''
+      this._cdr.detectChanges(); // Ensure UI updates
     } catch (e: any) {
       console.error('Load data error:', e)
       this.error = e?.message || 'Failed to load mission data'
@@ -92,33 +117,75 @@ export class MissionSpecificManager implements OnInit {
   }
 
   async startMission() {
-    if (!confirm('Start mission?')) return
-    try {
-      await this._missionService.startMission(this.missionId)
-      await this.loadData()
-    } catch (e: any) {
-      alert(e?.error?.message || 'Failed')
-    }
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      panelClass: 'premium-dialog-panel',
+      data: {
+        title: 'Start Mission?',
+        message: 'Initiate mission protocols? This will lock the roster.',
+        confirmText: 'Execute',
+        cancelText: 'Abort'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this._missionService.startMission(this.missionId)
+          await this.loadData()
+        } catch (e: any) {
+          this._snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 })
+        }
+      }
+    });
   }
 
   async completeMission() {
-    if (!confirm('Complete mission?')) return
-    try {
-      await this._missionService.completeMission(this.missionId)
-      await this.loadData()
-    } catch (e: any) {
-      alert(e?.error?.message || 'Failed')
-    }
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      panelClass: 'premium-dialog-panel',
+      data: {
+        title: 'Complete Mission?',
+        message: 'Mark mission as accomplished? Awards will be distributed.',
+        confirmText: 'Complete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this._missionService.completeMission(this.missionId)
+          await this.loadData()
+        } catch (e: any) {
+          this._snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 })
+        }
+      }
+    });
   }
 
   async deleteMission() {
-    if (!confirm('Delete this mission?')) return
-    try {
-      await this._missionService.delete(this.missionId)
-      this._router.navigate(['/chief'])
-    } catch (e: any) {
-      alert(e?.error?.message || 'Failed')
-    }
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      panelClass: 'premium-dialog-panel',
+      data: {
+        title: 'Delete Mission?',
+        message: 'Permanently scrub this mission from records? This cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this._missionService.delete(this.missionId)
+          this._router.navigate(['/chief'])
+        } catch (e: any) {
+          this._snackBar.open(e?.error?.message || 'Failed', 'Close', { duration: 3000 })
+        }
+      }
+    });
   }
 
   toggleEdit() {
@@ -141,36 +208,65 @@ export class MissionSpecificManager implements OnInit {
       this.isEditing = false
       await this.loadData()
     } catch (e: any) {
-      alert(e?.error?.message || 'Failed to save')
+      this._snackBar.open(e?.error?.message || 'Failed to save', 'Close', { duration: 3000 })
     }
   }
 
   async kick(memberId: number) {
-    if (!confirm('Kick this member?')) return
-    try {
-      await this._missionService.kickCrew(this.missionId, memberId)
-      alert('Member kicked successfully')
-      await this.loadData()
-    } catch (e: any) {
-      alert(e?.error?.message || 'Failed to kick')
-    }
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      panelClass: 'premium-dialog-panel',
+      data: {
+        title: 'Kick Operative?',
+        message: 'Remove this agent from the mission roster?',
+        confirmText: 'Remove',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this._missionService.kickCrew(this.missionId, memberId)
+          this._snackBar.open('Member kicked successfully', 'Close', { duration: 3000 })
+          await this.loadData()
+        } catch (e: any) {
+          this._snackBar.open(e?.error?.message || 'Failed to kick', 'Close', { duration: 3000 })
+        }
+      }
+    });
   }
 
 
 
   async leaveMission() {
-    if (!confirm('Are you sure you want to leave this mission?')) return
-    try {
-      await this._missionService.leaveMission(this.missionId)
-      this._router.navigate(['/chief']) // Redirect to My Missions
-    } catch (e: any) {
-      alert(e?.error?.message || 'Leave failed')
-    }
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      panelClass: 'premium-dialog-panel',
+      data: {
+        title: 'Abort Mission?',
+        message: 'Are you sure you want to leave this mission?',
+        confirmText: 'Leave',
+        cancelText: 'Stay'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this._missionService.leaveMission(this.missionId)
+          this._router.navigate(['/chief']) // Redirect to My Missions
+        } catch (e: any) {
+          this._snackBar.open(e?.error?.message || 'Leave failed', 'Close', { duration: 3000 })
+        }
+      }
+    });
   }
 
   openInviteDialog() {
     this._dialog.open(InviteMemberComponent, {
       width: '400px',
+      panelClass: 'premium-dialog-panel',
       data: {
         missionId: this.missionId,
         currentMembers: this.crew.map(c => c.id).concat(this.mission?.chief_id)

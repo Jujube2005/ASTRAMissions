@@ -12,15 +12,18 @@
 
     <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12 space-y-16">
 
-        <!-- Header -->
-        <div class="text-center space-y-4 animate-fade-in-up">
-            <h1 class="font-display text-5xl md:text-7xl font-black tracking-tighter text-white">
-                TOP YOKAI <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">HUNTERS</span>
-            </h1>
-            <p class="text-slate-400 max-w-2xl mx-auto text-lg tracking-wide">
-                The most elite warriors who have mastered the Mission Protocols and silenced the shadows.
-            </p>
+        <!-- Header Container with Floating -->
+        <div class="animate-float">
+            <!-- Header Inner with 3D Tilt -->
+            <div class="text-center space-y-4 animate-fade-in-up cursor-default" [appThreeDTilt]="10">
+                <h1 class="font-display text-5xl md:text-7xl font-black tracking-tighter text-white">
+                    ASTRA TOP <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">BRAWLERS</span>
+                </h1>
+                <p class="text-slate-400 max-w-2xl mx-auto text-lg tracking-wide">
+                    The highest-ranked operatives in the mission network. Performance. Precision. Results.
+                </p>
+            </div>
         </div>
 
         @if (leaderboard$ | async; as players) {
@@ -29,7 +32,8 @@
 
             <!-- Rank 2 -->
             @if (players[1]) {
-            <div class="order-2 md:order-1 flex flex-col items-center animate-fade-in-up" style="animation-delay: 0.2s">
+            <div class="order-2 md:order-1 flex flex-col items-center animate-fade-in-up animate-float"
+                style="animation-delay: 0.2s">
                 <div class="relative w-full group cursor-pointer" [appThreeDTilt]="15">
                     <div
                         class="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-400 text-white w-10 h-10 rounded-full flex items-center justify-center font-display text-xl font-bold shadow-lg border-2 border-slate-300 z-20 rank-badge-3d">
@@ -63,7 +67,7 @@
 
             <!-- Rank 1 -->
             @if (players[0]) {
-            <div class="order-1 md:order-2 flex flex-col items-center z-10 animate-fade-in-up"
+            <div class="order-1 md:order-2 flex flex-col items-center z-10 animate-fade-in-up animate-float"
                 style="animation-delay: 0.1s">
                 <div class="relative w-full group cursor-pointer transform md:scale-110" [appThreeDTilt]="20">
                     <!-- Crown/Rank Indicator -->
@@ -104,7 +108,8 @@
 
             <!-- Rank 3 -->
             @if (players[2]) {
-            <div class="order-3 flex flex-col items-center animate-fade-in-up" style="animation-delay: 0.3s">
+            <div class="order-3 flex flex-col items-center animate-fade-in-up animate-float"
+                style="animation-delay: 0.3s">
                 <div class="relative w-full group cursor-pointer" [appThreeDTilt]="15">
                     <div
                         class="absolute -top-6 left-1/2 -translate-x-1/2 bg-orange-800 text-white w-10 h-10 rounded-full flex items-center justify-center font-display text-xl font-bold shadow-lg border-2 border-white z-20 rank-badge-3d">
@@ -139,84 +144,85 @@
             }
         </div>
 
-        <!-- Global Ranking Table -->
-        <div class="bg-[#1d1135]/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl animate-fade-in-up"
-            style="animation-delay: 0.4s">
-            <div
-                class="p-6 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-white/[0.02]">
-                <h2 class="font-display text-xl tracking-widest font-bold flex items-center gap-3 text-white">
-                    <span class="material-symbols-outlined text-primary text-2xl">military_tech</span>
-                    GLOBAL RANKINGS
-                </h2>
-                <div class="flex gap-2">
-                    <div class="relative group">
-                        <span
-                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg group-hover:text-primary transition-colors">search</span>
-                        <input type="text" placeholder="Search hunter..."
-                            class="bg-[#0f071a] border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs font-bold text-white placeholder-slate-600 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none w-64 transition-all">
+        <!-- Global Ranking Table with Floating Wrap -->
+        <div class="animate-float">
+            <div class="bg-[#1d1135]/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl animate-fade-in-up"
+                style="animation-delay: 0.4s">
+                <div
+                    class="p-6 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-white/[0.02]">
+                    <h2 class="font-display text-xl tracking-widest font-bold flex items-center gap-3 text-white">
+                        <span class="material-symbols-outlined text-primary text-2xl">military_tech</span>
+                        GLOBAL RANKINGS
+                    </h2>
+                    <div class="flex gap-2">
+                        <div class="search-box-expandable">
+                            <span class="material-symbols-outlined search-icon">search</span>
+                            <input type="text" placeholder="Search hunter...">
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr
-                            class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5 bg-black/20">
-                            <th class="px-8 py-5">Rank</th>
-                            <th class="px-8 py-5">Hunter</th>
-                            <th class="px-8 py-5">Title</th>
-                            <th class="px-8 py-5 text-right">Completed</th>
-                            <th class="px-8 py-5 text-right">Success Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        @for (player of players.slice(3); track player.id; let i = $index) {
-                        <tr class="hover:bg-white/[0.03] transition-colors group cursor-pointer">
-                            <td class="px-8 py-5">
-                                <span
-                                    class="font-display text-lg font-bold text-slate-600 group-hover:text-white transition-colors">#{{
-                                    i + 4 < 10 ? '0' + (i + 4) : (i + 4) }}</span>
-                            </td>
-                            <td class="px-8 py-5">
-                                <div class="flex items-center gap-4">
-                                    <div class="relative">
-                                        <img [src]="player.avatar_url || 'assets/default.avatar.jpg'"
-                                            class="w-10 h-10 rounded-full border-2 border-white/10 group-hover:border-primary/50 transition-colors object-cover">
-                                        <div
-                                            class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#1d1135]">
-                                        </div>
-                                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5 bg-black/20">
+                                <th class="px-8 py-5">Rank</th>
+                                <th class="px-8 py-5">Hunter</th>
+                                <th class="px-8 py-5">Title</th>
+                                <th class="px-8 py-5 text-right">Completed</th>
+                                <th class="px-8 py-5 text-right">Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @for (player of players.slice(3); track player.id; let i = $index) {
+                            <tr class="hover:bg-white/[0.03] transition-colors group cursor-pointer">
+                                <td class="px-8 py-5">
                                     <span
-                                        class="font-bold text-sm text-slate-300 group-hover:text-white transition-colors tracking-wide">{{
-                                        player.display_name }}</span>
-                                </div>
-                            </td>
-                            <td class="px-8 py-5">
-                                <span
-                                    class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:bg-white/10 group-hover:text-primary transition-colors">{{
-                                    getRankTitle(player.mission_success_count) }}</span>
-                            </td>
-                            <td
-                                class="px-8 py-5 font-mono text-sm text-slate-400 text-right group-hover:text-white transition-colors">
-                                {{ player.mission_success_count }}</td>
-                            <td class="px-8 py-5 text-right">
-                                <span class="font-bold text-emerald-500 text-sm">{{
-                                    getSuccessRate(player.mission_success_count, player.mission_join_count) }}</span>
-                            </td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                                        class="font-display text-lg font-bold text-slate-600 group-hover:text-white transition-colors">#{{
+                                        i + 4 < 10 ? '0' + (i + 4) : (i + 4) }}</span>
+                                </td>
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-4">
+                                        <div class="relative">
+                                            <img [src]="player.avatar_url || 'assets/default.avatar.jpg'"
+                                                class="w-10 h-10 rounded-full border-2 border-white/10 group-hover:border-primary/50 transition-colors object-cover">
+                                            <div
+                                                class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#1d1135]">
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="font-bold text-sm text-slate-300 group-hover:text-white transition-colors tracking-wide">{{
+                                            player.display_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5">
+                                    <span
+                                        class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider group-hover:bg-white/10 group-hover:text-primary transition-colors">{{
+                                        getRankTitle(player.mission_success_count) }}</span>
+                                </td>
+                                <td
+                                    class="px-8 py-5 font-mono text-sm text-slate-400 text-right group-hover:text-white transition-colors">
+                                    {{ player.mission_success_count }}</td>
+                                <td class="px-8 py-5 text-right">
+                                    <span class="font-bold text-emerald-500 text-sm">{{
+                                        getSuccessRate(player.mission_success_count, player.mission_join_count)
+                                        }}</span>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="p-6 border-t border-white/5 bg-white/[0.02] text-center">
-                <button
-                    class="text-primary hover:text-white font-bold text-xs tracking-[0.2em] uppercase transition-colors flex items-center justify-center gap-2 mx-auto group">
-                    Load More Rankings
-                    <span
-                        class="material-symbols-outlined text-sm group-hover:translate-y-1 transition-transform">expand_more</span>
-                </button>
+                <div class="p-6 border-t border-white/5 bg-white/[0.02] text-center">
+                    <button
+                        class="text-primary hover:text-white font-bold text-xs tracking-[0.2em] uppercase transition-colors flex items-center justify-center gap-2 mx-auto group">
+                        Load More Rankings
+                        <span
+                            class="material-symbols-outlined text-sm group-hover:translate-y-1 transition-transform">expand_more</span>
+                    </button>
+                </div>
             </div>
         </div>
         }

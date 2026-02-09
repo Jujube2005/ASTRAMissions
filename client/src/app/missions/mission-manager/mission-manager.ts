@@ -11,10 +11,11 @@ import { BehaviorSubject } from 'rxjs'
 import { PassportService } from '../../_services/passport-service'
 import { NotificationService } from '../../_services/notification-service'
 import { Router } from '@angular/router'
+import { ThreeDTiltDirective } from '../../_directives/three-d-tilt.directive'
 
 @Component({
   selector: 'app-mission-manager',
-  imports: [MatIconModule, MatButtonModule, MatDialogModule, DatePipe, AsyncPipe],
+  imports: [MatIconModule, MatButtonModule, MatDialogModule, DatePipe, AsyncPipe, ThreeDTiltDirective],
   templateUrl: './mission-manager.html',
   styleUrl: './mission-manager.scss',
 })

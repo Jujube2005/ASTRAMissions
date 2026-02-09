@@ -68,7 +68,7 @@
             </div>
 
             <!-- SQUAD ROSTER CARD -->
-            <div class="premium-card p-10 space-y-8">
+            <div class="premium-card p-10 space-y-8 animate-float" style="animation-delay: 2s">
                 <div class="tech-corner tech-corner-tl opacity-40"></div>
                 <div class="tech-corner tech-corner-br opacity-40"></div>
 
@@ -124,7 +124,7 @@
         <div class="lg:col-span-7 flex flex-col space-y-10 animate-fade-in-up" style="animation-delay: 0.1s">
 
             <!-- MISSION INTEL CARD -->
-            <div class="premium-card p-10 space-y-10">
+            <div class="premium-card p-10 space-y-10 animate-float-delayed">
                 <div class="flex items-center gap-4 text-primary/40">
                     <span
                         class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(124,58,237,0.8)]"></span>
@@ -178,7 +178,8 @@
                     </div>
                     <!-- Chat Component -->
                     <div class="flex-1 relative overflow-hidden min-h-0">
-                        <app-mission-chat [missionId]="m.id" [chiefId]="m.chief_id"></app-mission-chat>
+                        <app-mission-chat [missionId]="m.id" [chiefId]="m.chief_id"
+                            [isReadOnly]="m.status === 'Completed'"></app-mission-chat>
                     </div>
                 </div>
                 } @else {

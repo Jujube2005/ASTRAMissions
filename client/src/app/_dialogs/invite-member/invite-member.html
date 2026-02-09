@@ -1,27 +1,57 @@
-<h2 mat-dialog-title>Invite Member</h2>
-<mat-dialog-content>
-    <div style="margin-bottom: 1rem;">
-        <input style="width: 100%; padding: 0.5rem;" type="text" [(ngModel)]="searchTerm"
-            (ngModelChange)="onSearchChange()" placeholder="Search User" />
+<div class="invite-dialog-container">
+    <div class="dialog-header">
+        <div class="header-content">
+            <div class="icon-wrapper">
+                <span class="material-symbols-outlined">person_add</span>
+            </div>
+            <h2>Recruit Agent</h2>
+        </div>
     </div>
 
-    <div style="max-height: 400px; overflow-y: auto;">
-        @for(user of filteredUsers; track user.id) {
-        <div
-            style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #ccc;">
-            <div style="display: flex; align-items: center;">
-                <img [src]="user.avatar_url || 'assets/default.avatar.jpg'"
-                    style="width: 40px; height: 40px; border-radius: 50%; margin-right: 1rem;" />
-                <span>{{user.display_name}}</span>
-            </div>
-            <button mat-stroked-button color="primary" (click)="invite(user)" [disabled]="isInvited(user.id)"
-                *ngIf="!currentMembers.has(user.id)">
-                {{ isInvited(user.id) ? 'Invited' : 'Invite' }}
-            </button>
+    <div class="dialog-content custom-scrollbar">
+        <!-- Search Field -->
+        <div class="search-box">
+            <span class="material-symbols-outlined">search</span>
+            <input class="search-input" type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
+                placeholder="Locate brawler in database...">
         </div>
-        }
+
+        <!-- User List -->
+        <div class="user-list">
+            @for(user of filteredUsers; track user.id) {
+            <div class="user-item">
+                <div class="user-info">
+                    <div class="avatar-frame">
+                        <img [src]="user.avatar_url || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + user.display_name"
+                            alt="Avatar" />
+                    </div>
+                    <div class="details">
+                        <span class="name">{{user.display_name}}</span>
+                        <span class="status">Active</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="invite-btn" (click)="invite(user)" [disabled]="isInvited(user.id)"
+                        *ngIf="!currentMembers.has(user.id)">
+                        <span class="material-symbols-outlined">{{ isInvited(user.id) ? 'check' : 'add' }}</span>
+                    </button>
+                    <span *ngIf="currentMembers.has(user.id)"
+                        class="text-[10px] uppercase font-bold text-emerald-400 opacity-50 px-3">Assigned</span>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-search">
+                <div class="icon-wrapper">
+                    <span class="material-symbols-outlined">person_search</span>
+                </div>
+                <p>No operatives found</p>
+            </div>
+            }
+        </div>
     </div>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close>Close</button>
-</mat-dialog-actions>
+
+    <div class="dialog-actions">
+        <button class="close-btn" mat-dialog-close>Close Uplink</button>
+    </div>
+</div>

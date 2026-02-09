@@ -2,13 +2,16 @@
     <!-- Stealth Tabs -->
     <div class="tabs">
         <button [class.active]="filter === 'all'" (click)="filter = 'all'">
-            <span class="material-icons">ALL</span>
+            <span class="material-symbols-outlined">dvr</span>
+            ALL LOGS
         </button>
         <button [class.active]="filter === 'chat'" (click)="filter = 'chat'">
-            <span class="material-icons">COMMS</span>
+            <span class="material-symbols-outlined">forum</span>
+            COMMS
         </button>
         <button [class.active]="filter === 'activity'" (click)="filter = 'activity'">
-            <span class="material-icons">analytics</span>
+            <span class="material-symbols-outlined">analytics</span>
+            INTEL
         </button>
     </div>
 
@@ -48,7 +51,7 @@
             <!-- System Message -->
             <ng-container *ngIf="msg.type_ === 'system'">
                 <div class="system-log">
-                    <span class="log-prefix">SIGNAL_EVENT</span>
+                    <span class="material-symbols-outlined log-icon">info</span>
                     <span class="log-content">{{ msg.content }}</span>
                     <span class="log-time">{{ msg.created_at | date:'HH:mm' }}</span>
                 </div>
@@ -56,7 +59,7 @@
         </div>
 
         <div *ngIf="!loadingMessages && filteredMessages.length === 0" class="empty-state">
-            <span class="material-icons">sensors_off</span>
+            <span class="material-symbols-outlined">sensors_off</span>
             <p>NO ACTIVE TRANSMISSIONS DETECTED</p>
         </div>
     </div>
@@ -65,11 +68,14 @@
     <div class="input-area" *ngIf="filter !== 'activity'">
         <div class="input-wrapper">
             <input type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"
-                placeholder="ENTER SECURE TRANSMISSION…" [disabled]="sendingMessage">
+                [placeholder]="isReadOnly ? 'CHANNEL ENCRYPTED / MISSION CLOSED' : 'ENTER SECURE TRANSMISSION...'"
+                [disabled]="sendingMessage || isReadOnly">
             <div class="input-glow"></div>
         </div>
-        <button (click)="sendMessage()" class="send-btn" [disabled]="!newMessage.trim() || sendingMessage">
-            <span class="material-icons">{{ sendingMessage ? 'sync' : 'send' }}</span>
+        <button (click)="sendMessage()" class="send-btn"
+            [disabled]="!newMessage.trim() || sendingMessage || isReadOnly">
+            <span class="material-symbols-outlined">{{ sendingMessage ? 'sync' : (isReadOnly ? 'lock' : 'send')
+                }}</span>
         </button>
     </div>
 </div>

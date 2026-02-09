@@ -33,6 +33,11 @@ export const routes: Routes = [
     },
     // *้เพิ่ม
     { path: 'mission-summary', component: MissionSummaryComponent, canActivate: [authGuard], runGuardsAndResolvers: 'always' },
+    // *About Us Page
+    {
+        path: 'about-us',
+        loadComponent: () => import('./about/about').then(m => m.About)
+    },
     // *้เพิ่ม
     { path: 'leaderboard', component: LeaderboardComponent, canActivate: [authGuard], runGuardsAndResolvers: 'always' },
     {

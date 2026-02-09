@@ -1,10 +1,11 @@
-
 use axum::{
-    extract::{Extension, Path, State},
-    http::StatusCode as AxumStatusCode,
+    extract::{Path, State, Extension},
     response::IntoResponse,
     routing::{get, post},
-    Json, Router, middleware,
+    Router,
+    middleware,
+    Json,
+    http::StatusCode as AxumStatusCode,
 };
 use std::sync::Arc;
 use serde::Deserialize;
@@ -52,8 +53,11 @@ async fn accept_invite(
     Path(invite_id): Path<i32>,
 ) -> impl IntoResponse {
     match use_case.accept(invite_id, user_id).await {
-        Ok(_) => (AxumStatusCode::OK, "Invite accepted").into_response(),
-        Err(e) => (AxumStatusCode::BAD_REQUEST, e.to_string()).into_response(),
+        Ok(_) => (AxumStatusCode::OK, Json(serde_json::json!({"message": "Invite accepted"}))).into_response(),
+        Err(e) => {
+            eprintln!("Failed to accept invite {}: {}", invite_id, e);
+            (AxumStatusCode::BAD_REQUEST, Json(serde_json::json!({"error": e.to_string()}))).into_response()
+        },
     }
 }
 
@@ -63,8 +67,11 @@ async fn decline_invite(
     Path(invite_id): Path<i32>,
 ) -> impl IntoResponse {
     match use_case.decline(invite_id, user_id).await {
-        Ok(_) => (AxumStatusCode::OK, "Invite declined").into_response(),
-        Err(e) => (AxumStatusCode::BAD_REQUEST, e.to_string()).into_response(),
+        Ok(_) => (AxumStatusCode::OK, Json(serde_json::json!({"message": "Invite declined"}))).into_response(),
+        Err(e) => {
+            eprintln!("Failed to decline invite {}: {}", invite_id, e);
+            (AxumStatusCode::BAD_REQUEST, Json(serde_json::json!({"error": e.to_string()}))).into_response()
+        },
     }
 }
 

@@ -1,0 +1,13 @@
+<div class="confirmation-dialog">
+    <div class="glow-bg"></div>
+    @if (data.title) {
+    <h2>{{ data.title }}</h2>
+    }
+    @if (data.message) {
+    <p>{{ data.message }}</p>
+    }
+    <div class="actions">
+        <button class="confirm" (click)="confirm()">{{ data.confirmText || 'Confirm' }}</button>
+        <button class="cancel" (click)="cancel()">{{ data.cancelText || 'Cancel' }}</button>
+    </div>
+</div>

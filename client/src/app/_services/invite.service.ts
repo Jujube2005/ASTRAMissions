@@ -18,14 +18,14 @@ export class InviteService {
 
     async accept(inviteId: number): Promise<any> {
         const url = `${this._base_url}/invite/${inviteId}/accept`;
-        const res = await firstValueFrom(this._http.post(url, {}));
+        const res = await firstValueFrom(this._http.post<any>(url, {}));
         this.invites.update(prev => prev.filter(i => i.id !== inviteId));
         return res;
     }
 
     async decline(inviteId: number): Promise<any> {
         const url = `${this._base_url}/invite/${inviteId}/decline`;
-        const res = await firstValueFrom(this._http.post(url, {}));
+        const res = await firstValueFrom(this._http.post<any>(url, {}));
         this.invites.update(prev => prev.filter(i => i.id !== inviteId));
         return res;
     }

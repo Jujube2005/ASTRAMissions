@@ -1,50 +1,94 @@
-<div class="new-mission">
-    <button mat-raised-button (click)="openDialog()"><mat-icon>add</mat-icon> new mission</button>
-</div>
+<div class="mission-manager-page">
+    <div class="manager-container">
 
-<div class="mission-list">
-    @if((myMissions$ | async)?.length) {
-    <div class="header">
-        <span class="name">Name</span>
-        <span class="role">Role</span>
-        <span class="chief">Chief</span>
-        <span class="description">Description</span>
-        <span class="category">Category</span>
-        <span class="crew_count">Number of Crew</span>
-        <span class="status">Status</span>
-        <span class="created_at">Created at</span>
-        <span class="updated_at">Updated at</span>
-        <span class="action">Actions</span>
-    </div>
-    @for (mission of myMissions$ | async; track mission.id) {
+        <!-- HEADER SECTION -->
+        <header class="manager-header">
+            <div class="title-group">
+                <p>Strategic Intelligence</p>
+                <h1>Mission Control</h1>
+            </div>
 
-    <div class="contents" (click)="navigateToMission(mission.id)">
-        <span class="name">
-            @if (hasJoinAlert(mission.id)) {
-            <span class="red-dot"></span>
-            }
-            {{mission.name}}
-        </span>
-        <span class="role">
-            @if (mission.chief_id === (passport.userId())) {
-            <span style="color: gold; font-weight: bold;">Chief</span>
+            <button class="new-mission-btn" (click)="openDialog()">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Initialize Protocol</span>
+            </button>
+        </header>
+
+        <!-- MISSIONS LIST -->
+        <div class="mission-manager-list floating-container">
+            <!-- Table Header -->
+            @if((myMissions$ | async)?.length) {
+            <div class="header-row">
+                <span>Protocol Name</span>
+                <span>Access Level</span>
+                <span>Operative</span>
+                <span>Briefing</span>
+                <span>Sector</span>
+                <span>Unit Capacity</span>
+                <span>Status</span>
+                <span></span>
+            </div>
+
+            <div class="mission-rows-container">
+                @for (mission of myMissions$ | async; track mission.id) {
+                <div class="mission-row group" (click)="navigateToMission(mission.id)">
+
+                    <!-- Name & Alert -->
+                    <div class="name-cell">
+                        @if (hasJoinAlert(mission.id)) {
+                        <div class="alert-dot" title="New deployment request"></div>
+                        }
+                        <span class="mission-name">{{mission.name}}</span>
+                    </div>
+
+                    <!-- Role -->
+                    <div class="role-cell">
+                        <span class="role-badge" [class.chief]="mission.chief_id === (passport.userId())"
+                            [class.member]="mission.chief_id !== (passport.userId())">
+                            {{mission.chief_id === (passport.userId()) ? 'CHIEF' : 'MEMBER'}}
+                        </span>
+                    </div>
+
+                    <!-- Chief Name -->
+                    <div class="chief-cell">
+                        {{mission.chief_display_name}}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="desc-cell">
+                        {{mission.description || 'No classified intelligence available.'}}
+                    </div>
+
+                    <!-- Category -->
+                    <div class="category-cell">
+                        <span class="category-badge">{{mission.category || 'General'}}</span>
+                    </div>
+
+                    <!-- Crew Count -->
+                    <div class="crew-cell">
+                        {{mission.crew_count}} / {{mission.max_crew || 5}}
+                    </div>
+
+                    <!-- Status -->
+                    <div class="status-cell">
+                        <span class="status-badge" [class]="mission.status">
+                            {{mission.status}}
+                        </span>
+                    </div>
+
+                    <!-- Action Icon -->
+                    <div class="action-cell">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </div>
+                </div>
+                }
+            </div>
             } @else {
-            <span style="color: #aaa;">Member</span>
+            <div class="p-20 text-center">
+                <span class="material-symbols-outlined text-6xl text-slate-800 mb-4">leaderboard</span>
+                <p class="text-slate-500 font-bold uppercase tracking-widest">No active deployments found.</p>
+            </div>
             }
-        </span>
-        <span class="chief">{{mission.chief_display_name}}</span>
-        <span class="description">{{mission.description}}</span>
-        <span class="category">{{mission.category}}</span>
-        <span class="crew_count">{{mission.crew_count}} / {{mission.max_crew}}</span>
-        <span class="status">{{mission.status}}</span>
-        <span class="created_at">{{mission.created_at | date:'short'}}</span>
-        <span class="updated_at">{{mission.updated_at | date:'short'}}</span>
-        <!-- Actions removed as requested, moved to Mission Specific Manager -->
-        <span class="action">
-            <mat-icon>chevron_right</mat-icon>
-        </span>
+        </div>
     </div>
-
-    }
-    }
 </div>

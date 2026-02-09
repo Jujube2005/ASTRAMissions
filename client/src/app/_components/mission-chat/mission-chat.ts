@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs'
 export class MissionChatComponent implements OnInit, OnChanges, OnDestroy {
   @Input() missionId!: number
   @Input() chiefId?: number
+  @Input() isReadOnly: boolean = false
 
   missionService = inject(MissionService)
   missionSocket = inject(MissionSocketService)

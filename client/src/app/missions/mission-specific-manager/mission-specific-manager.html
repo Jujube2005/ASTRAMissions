@@ -1,75 +1,120 @@
-<div class="loading" *ngIf="isLoading">
-    <p>Loading mission details...</p>
-</div>
+<div class="mission-specific-page">
+    <div class="container">
 
-<div class="error-container" *ngIf="error">
-    <p class="error-msg">{{error}}</p>
-    <div class="actions">
-        <button (click)="loadData()">Retry</button>
-        <button (click)="goBack()">Back</button>
-    </div>
-</div>
+        <!-- LOADING STATE -->
+        <div class="loading-state" *ngIf="isLoading">
+            <div class="spinner"></div>
+            <p class="uppercase tracking-widest text-slate-500 font-bold">Establishing Secure Link...</p>
+        </div>
 
-<div class="container" *ngIf="mission && !isLoading && !error">
-    <div class="header">
-        <button (click)="goBack()">Back</button>
-        <h2>Mission Manager</h2>
-    </div>
-
-    <div class="mission-details">
-        <div *ngIf="!isEditing">
-            <h3>{{mission.name}} <span class="badge" [class]="mission.status">{{mission.status}}</span></h3>
-            <p>{{mission.description}}</p>
-            <div class="actions" *ngIf="mission.status !== 'Completed' && isChief">
-                <button (click)="toggleEdit()">Edit Details</button>
-                <button (click)="deleteMission()" class="danger">Delete Mission</button>
-            </div>
-            <div class="actions" *ngIf="!isChief">
-                <button (click)="leaveMission()" class="warn">Leave Mission</button>
+        <!-- ERROR STATE -->
+        <div class="error-state" *ngIf="error">
+            <span class="material-symbols-outlined text-6xl text-red-500/50 mb-6">report_problem</span>
+            <p class="text-xl font-bold text-red-400 mb-6">{{error}}</p>
+            <div class="flex gap-4">
+                <button (click)="loadData()"
+                    class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs">Reconnect</button>
+                <button (click)="goBack()"
+                    class="bg-primary/20 text-primary px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs">Abort
+                    Link</button>
             </div>
         </div>
 
-        <div *ngIf="isEditing && isChief" class="edit-form">
-            <input [(ngModel)]="editName" placeholder="Mission Name" />
-            <textarea [(ngModel)]="editDescription" placeholder="Description"></textarea>
-            <div class="form-actions">
-                <button (click)="saveEdit()">Save</button>
-                <button (click)="toggleEdit()">Cancel</button>
-            </div>
-        </div>
-    </div>
+        <!-- MAIN CONTENT -->
+        <div class="content-animate" *ngIf="mission && !isLoading && !error">
 
-    <div class="mission-controls" *ngIf="isChief">
-        <button *ngIf="(mission.status === 'Open' || mission.status === 'Failed') && crew.length > 0"
-            (click)="startMission()" class="primary">Start Mission</button>
-        <button *ngIf="mission.status === 'InProgress'" (click)="completeMission()" class="success">Complete
-            Mission</button>
-    </div>
+            <header class="header">
+                <button (click)="goBack()" class="back-btn">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Return
+                </button>
+                <h2>Protocol Detail</h2>
+            </header>
 
-    <div style="margin-top: 20px;">
-        <h3>Chat</h3>
-        <app-mission-chat [missionId]="missionId" [chiefId]="mission.chief_id"></app-mission-chat>
-    </div>
+            <div class="manager-grid">
 
-    <div class="crew-section">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>Crew Members ({{crew.length}})</h3>
-            <button (click)="openInviteDialog()" *ngIf="isChief && mission.status !== 'Completed'">Invite
-                Member</button>
-        </div>
-        <div class="crew-list">
-            <div class="crew-item" *ngFor="let member of crew">
-                <div class="info">
-                    <img [src]="member.avatar_url || 'https://via.placeholder.com/40'" alt="Avatar" class="avatar">
-                    <span [class.chief-star]="member.id === mission.chief_id">{{member.display_name}} <span
-                            *ngIf="member.id === mission.chief_id">(Chief)</span></span>
+                <!-- LEFT COLUMN: MISSION DETAILS -->
+                <div class="mission-info-panel glass-panel floating-container">
+                    <div *ngIf="!isEditing">
+                        <p class="text-[10px] text-primary font-bold uppercase tracking-[0.3em] mb-2">Protocol Code</p>
+                        <h3>
+                            {{mission.name}}
+                            <span class="status-badge" [class]="mission.status">{{mission.status}}</span>
+                        </h3>
+
+                        <div class="mission-desc">
+                            {{mission.description || 'Classified mission parameters. No unauthorized disclosure.'}}
+                        </div>
+
+                        <!-- CHIEF ACTIONS -->
+                        <div class="action-bar" *ngIf="isChief">
+                            @if (mission.status === 'Open' || mission.status === 'Failed') {
+                            <button (click)="startMission()" class="primary-action">Deploy Protocol</button>
+                            <button (click)="deleteMission()" class="danger-action">Terminate Protocol</button>
+                            } @else if (mission.status === 'InProgress') {
+                            <button (click)="completeMission()" class="primary-action">Finalize Operation</button>
+                            }
+                        </div>
+
+                        <!-- MEMBER ACTIONS -->
+                        <div class="action-bar" *ngIf="!isChief">
+                            <button (click)="leaveMission()" class="danger-action">Relinquish Commission</button>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="actions"
-                    *ngIf="mission.status !== 'Completed' && isChief && member.id !== mission.chief_id">
-                    <button (click)="kick(member.id)" class="warn">Kick</button>
+
+                <!-- RIGHT COLUMN: CREW & DEPLOYMENT -->
+                <div class="flex flex-col gap-8">
+
+                    <!-- CREW SECTION -->
+                    <div class="crew-panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Deployed Crew ({{crew.length}})</h3>
+                            <button (click)="openInviteDialog()" *ngIf="isChief && mission.status !== 'Completed'"
+                                class="invite-btn">
+                                + Add Operative
+                            </button>
+                        </div>
+
+                        <div class="crew-list">
+                            <div class="crew-item" *ngFor="let member of crew">
+                                <div class="member-info">
+                                    <img [src]="member.avatar_url || '/assets/avatar-placeholder.jpg'" alt="Avatar"
+                                        class="avatar">
+                                    <div>
+                                        <div class="name">
+                                            {{member.display_name}}
+                                            <span *ngIf="member.id === mission.chief_id"
+                                                class="material-symbols-outlined chief-star text-sm align-middle ml-1">stars</span>
+                                        </div>
+                                        <p class="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">
+                                            {{member.id === mission.chief_id ? 'Command Chief' : 'Active Field
+                                            Operative'}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="actions"
+                                    *ngIf="mission.status !== 'Completed' && isChief && member.id !== mission.chief_id">
+                                    <button (click)="kick(member.id)" class="kick-btn">Kick</button>
+                                </div>
+                            </div>
+                            <div *ngIf="crew.length === 0"
+                                class="text-center py-6 text-slate-600 uppercase tracking-tighter text-xs">No active
+                                personnel assigned.</div>
+                        </div>
+                    </div>
+
                 </div>
+
+                <!-- CHAT SECTION -->
+                <div class="chat-panel glass-panel floating-container">
+                    <h3>Secure Communication Channel</h3>
+                    <app-mission-chat [missionId]="missionId" [chiefId]="mission.chief_id"
+                        [isReadOnly]="mission.status === 'Completed'"></app-mission-chat>
+                </div>
+
             </div>
-            <div *ngIf="crew.length === 0" class="empty">No crew members yet.</div>
         </div>
     </div>
 </div>

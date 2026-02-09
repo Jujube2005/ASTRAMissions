@@ -13,6 +13,14 @@
             </div>
 
             <div class="h-px flex-1 mx-12 bg-primary/20 hidden md:block"></div>
+
+            @if (isSignin()) {
+            <button routerLink="/chief"
+                class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-all transform hover:scale-105 shadow-lg shadow-primary/20 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">settings</span>
+                MISSION CONTROL
+            </button>
+            }
         </div>
 
         <!-- FILTER PANEL -->
@@ -160,8 +168,6 @@
         <div
             class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 z-[120]">
         </div>
-
-        <!-- Close Button (Fixed at top-right of modal) -->
 
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto custom-scrollbar overflow-x-hidden relative">
