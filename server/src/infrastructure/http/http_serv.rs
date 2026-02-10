@@ -4,7 +4,7 @@ use anyhow::{Ok, Result};
 use axum::{
     Extension, Router, http::{
         Method, StatusCode,
-        header::{AUTHORIZATION, CONTENT_TYPE},
+        header::{AUTHORIZATION, CONTENT_TYPE, HeaderValue},
     }
 };
 use tokio::{net::TcpListener, sync::broadcast};
@@ -113,9 +113,9 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
                     Method::HEAD,
                 ])
                 .allow_origin([
-                    "https://astra-missions.vercel.app".parse().unwrap(),
-                    "http://localhost:4200".parse().unwrap(),
-                    "http://localhost:3000".parse().unwrap(),
+                    HeaderValue::from_static("https://astra-missions.vercel.app"),
+                    HeaderValue::from_static("http://localhost:4200"),
+                    HeaderValue::from_static("http://localhost:3000"),
                 ])
                 .allow_credentials(true)
                 .allow_headers([AUTHORIZATION, CONTENT_TYPE])
