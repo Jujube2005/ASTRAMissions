@@ -9,7 +9,7 @@ use axum::{
 };
 use tokio::{net::TcpListener, sync::broadcast};
 use tower_http::{
-    cors::{CorsLayer, ExposeHeaders},
+    cors::CorsLayer,
     limit::RequestBodyLimitLayer,
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -102,27 +102,7 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
             (config.server.body_limit * 1024 * 1024).try_into()?,
         ))
         .layer(
-            CorsLayer::new()
-                .allow_methods([
-                    Method::GET,
-                    Method::POST,
-                    Method::PUT,
-                    Method::PATCH,
-                    Method::DELETE,
-                    Method::OPTIONS,
-                    Method::HEAD,
-                ])
-                .allow_origin([
-                    HeaderValue::from_static("https://astra-missions.vercel.app"),
-                    HeaderValue::from_static("http://localhost:4200"),
-                    HeaderValue::from_static("http://localhost:3000"),
-                ])
-                .allow_credentials(true)
-                .allow_headers([AUTHORIZATION, CONTENT_TYPE])
-                .expose_headers(ExposeHeaders::list(vec![
-                    AUTHORIZATION.clone(),
-                    CONTENT_TYPE.clone(),
-                ])),
+            CorsLayer::permissive()
         )
         .layer(TraceLayer::new_for_http());
 
