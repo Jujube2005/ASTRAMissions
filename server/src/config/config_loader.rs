@@ -11,26 +11,25 @@ pub fn load() -> Result<DotEnvyConfig> {
     dotenvy::dotenv().ok();
 
     let server = Server {
-        port: std::env::var("SERVER_PORT")
-            .expect("SERVER_PORT is valid")
+        port: std::env::var("PORT")
+            .or_else(|_| std::env::var("SERVER_PORT"))
+            .unwrap_or_else(|_| "80".to_string())
             .parse()?,
         body_limit: std::env::var("SERVER_BODY_LIMIT")
-            .expect("SERVER_BODY_LIMIT is valid")
+            .unwrap_or_else(|_| "10".to_string())
             .parse()?,
         timeout: std::env::var("SERVER_TIMEOUT")
-            .expect("SERVER_TIMEOUT is valid")
+            .unwrap_or_else(|_| "60".to_string())
             .parse()?,
     };
 
     let database = Database {
         url: std::env::var("DATABASE_URL")
-            .expect("DATABASE_URL is valid")
-            .parse()?,
+            .expect("DATABASE_URL must be set"),
     };
 
     let secret = std::env::var("JWT_USER_SECRET")
-        .expect("SECRET is valid")
-        .parse()?;
+        .unwrap_or_else(|_| "change_me_in_production".to_string());
 
     let config = DotEnvyConfig {
         server,
