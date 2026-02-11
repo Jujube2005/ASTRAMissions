@@ -79,28 +79,22 @@ export class MissionManager {
   }
 
   openDialog() {
-    let chief_display_name = this.passport.data()?.display_name || "unnamed"
     const ref = this._dialog.open(NewMission)
     ref.afterClosed().subscribe(async (addMission: AddMission) => {
       if (addMission) {
-        const id = await this._mission.add(addMission)
-        const now = new Date()
-        const newMission: Mission = {
-          id,
-          name: addMission.name,
-          description: addMission.description,
-          category: addMission.category,
-          max_crew: addMission.max_crew || 5,
-          status: 'Open',
-          chief_id: 0,
-          chief_display_name,
-          crew_count: 0,
-          created_at: now,
-          updated_at: now
+        try {
+          await this._mission.add(addMission)
+          await this.loadMyMission() // Refresh list from server to get accurate data
+          this._notification.showLocalNotification({
+            title: 'Protocol Initialized',
+            message: 'Mission deployment successful',
+            type: 'success',
+            metadata: {}
+          })
+        } catch (e: any) {
+          console.error('Failed to create mission', e)
+          alert(e?.error?.message ?? e?.error ?? 'Failed to initialize mission')
         }
-        // เพิ่มข้อมูลใหม่เข้าไปใน BehaviorSubject
-        const currentMissions = this._missionsSubject.value
-        this._missionsSubject.next([...currentMissions, newMission])
       }
     })
   }

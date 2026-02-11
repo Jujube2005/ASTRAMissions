@@ -14,6 +14,9 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog'
 })
 export class NewMission {
   private readonly _data = inject<AddMission>(MAT_DIALOG_DATA, { optional: true })
+  isEdit = !!this._data;
+  title = this.isEdit ? 'Update Protocol' : 'Initialize Mission';
+  subtitle = this.isEdit ? 'Modify mission parameters' : 'Enter protocol parameters to begin deployment';
 
   addMission: AddMission = {
     name: this._data?.name || '',

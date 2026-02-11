@@ -1,21 +1,63 @@
-<h4 mat-dialog-title>New Mission</h4>
-<mat-dialog-content>
-    <input type="text" [(ngModel)]="addMission.name" placeholder="Mission Name" />
-    <textarea [(ngModel)]="addMission.description" placeholder="Mission Description"></textarea>
-    <select [(ngModel)]="addMission.category">
-        <option value="">-- Select Category --</option>
-        <option value="Game">Game</option>
-        <option value="General">General</option>
-        <option value="Sport">Sport</option>
-        <option value="Work">Work</option>
-    </select>
-    <div style="margin-bottom: 1rem;">
-        <label for="max_crew">Crew Capacity (2-10):</label>
-        <input id="max_crew" type="number" [(ngModel)]="addMission.max_crew" min="2" max="10" placeholder="Max Crew" />
-    </div>
+<div class="mission-dialog-container">
+    <header class="dialog-header">
+        <div class="header-icon">
+            <span class="material-symbols-outlined">{{ isEdit ? 'settings_suggest' : 'rocket_launch' }}</span>
+        </div>
+        <div class="header-text">
+            <h2 mat-dialog-title>{{ title }}</h2>
+            <p class="subtitle">{{ subtitle }}</p>
+        </div>
+    </header>
 
-    <mat-dialog-actions>
-        <button matButton mat-dialog-close>Cancel</button>
-        <button (click)="onSubmit()" mat-stroked-button type="submit" [disabled]="!addMission.name"> Create</button>
+    <mat-dialog-content class="astra-form">
+        <!-- ... existing form groups ... -->
+        <div class="form-group">
+            <label for="mission-name">
+                <span class="material-symbols-outlined">badge</span>
+                Protocol Designation
+            </label>
+            <input id="mission-name" type="text" [(ngModel)]="addMission.name" placeholder="e.g. Operation Alpha" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="mission-category">
+                    <span class="material-symbols-outlined">category</span>
+                    Sector
+                </label>
+                <select id="mission-category" [(ngModel)]="addMission.category">
+                    <option value="">-- Unassigned --</option>
+                    <option value="Game">Game</option>
+                    <option value="General">General</option>
+                    <option value="Sport">Sport</option>
+                    <option value="Work">Work</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="max-crew">
+                    <span class="material-symbols-outlined">groups</span>
+                    Unit Capacity
+                </label>
+                <input id="max-crew" type="number" [(ngModel)]="addMission.max_crew" min="2" max="10" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="mission-desc">
+                <span class="material-symbols-outlined">description</span>
+                Mission Briefing
+            </label>
+            <textarea id="mission-desc" [(ngModel)]="addMission.description"
+                placeholder="Detail the objective parameters..."></textarea>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button class="btn-cancel" mat-button mat-dialog-close>Abort</button>
+        <button class="btn-submit" (click)="onSubmit()" [disabled]="!addMission.name">
+            <span class="material-symbols-outlined">{{ isEdit ? 'save' : 'done_all' }}</span>
+            {{ isEdit ? 'Update Protocol' : 'Execute Deployment' }}
+        </button>
     </mat-dialog-actions>
-</mat-dialog-content>
+</div>
