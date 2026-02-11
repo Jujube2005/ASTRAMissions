@@ -7,10 +7,12 @@ import { Mission } from '../../_models/mission'
 import { ThreeDTiltDirective } from '../../_directives/three-d-tilt.directive'
 import { MissionChatComponent } from '../../_components/mission-chat/mission-chat'
 
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'
+
 @Component({
     selector: 'app-mission-detail',
     standalone: true,
-    imports: [CommonModule, RouterLink, DatePipe, ThreeDTiltDirective, MissionChatComponent],
+    imports: [CommonModule, RouterLink, DatePipe, ThreeDTiltDirective, MissionChatComponent, MatDialogModule],
     templateUrl: './mission-detail.html',
     styleUrls: ['./mission-detail.scss']
 })
@@ -19,6 +21,7 @@ export class MissionDetail implements OnInit {
     private _router = inject(Router)
     private _missionService: MissionService = inject(MissionService)
     public _passport: PassportService = inject(PassportService)
+    private _dialog = inject(MatDialog)
 
     mission = signal<Mission | undefined>(undefined)
     crew = signal<any[]>([])
@@ -108,6 +111,25 @@ export class MissionDetail implements OnInit {
             await this.loadMissionData() // Reload to update crew list
         } catch (e: any) {
             alert(e?.error?.message || 'Failed to leave mission')
+        }
+    }
+
+    async onImageUpload(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            try {
+                const error = await this._missionService.uploadMissionImg(this.missionId, file);
+                if (error) {
+                    alert('Upload failed: ' + error);
+                } else {
+                    // Auto refresh as requested
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+                alert('An unexpected error occurred during upload');
+            }
         }
     }
 }

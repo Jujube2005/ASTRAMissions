@@ -10,12 +10,14 @@ use crate::{
 #[diesel(table_name = missions)]
 pub struct MissionEntity {
     pub id: i32,
-    pub chief_id: i32,
     pub name: String,
-    pub status: String,
     pub description: Option<String>,
     pub category: Option<String>,
     pub max_crew: i32,
+    pub status: String,
+    pub chief_id: i32,
+    pub image_url: Option<String>,
+    pub image_public_id: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
@@ -34,6 +36,7 @@ impl MissionEntity {
             max_crew: self.max_crew,
             crew_count,
             is_member,
+            image_url: self.image_url.clone(),
             created_at: self.created_at,
             updated_at: self.updated_at,
         }
@@ -49,6 +52,8 @@ pub struct AddMissionEntity {
     pub description: Option<String>,
     pub category: Option<String>,
     pub max_crew: i32,
+    pub image_url: Option<String>,
+    pub image_public_id: Option<String>,
 }
 
 #[derive(Debug, Clone, AsChangeset)]
@@ -59,4 +64,6 @@ pub struct EditMissionEntity {
     pub description: Option<String>,
     pub category: Option<String>,
     pub max_crew: Option<i32>,
+    pub image_url: Option<String>,
+    pub image_public_id: Option<String>,
 }

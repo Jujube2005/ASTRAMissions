@@ -203,9 +203,10 @@ SELECT
     missions.max_crew,
     missions.status,
     missions.chief_id,
-    brawlers.display_name AS chief_display_name,
+    COALESCE(brawlers.display_name, '') AS chief_display_name,
     (SELECT COUNT(*) FROM crew_memberships WHERE crew_memberships.mission_id = missions.id) AS crew_count,
-    false AS is_member,
+    false::bool AS is_member,
+    missions.image_url,
     missions.created_at,
     missions.updated_at
 FROM missions

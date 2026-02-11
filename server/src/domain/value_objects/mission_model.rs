@@ -29,6 +29,8 @@ pub struct MissionModel {
     // *เพิ่ม
     #[diesel(sql_type = Bool)]
     pub is_member: bool,
+    #[diesel(sql_type = Nullable<Varchar>)]
+    pub image_url: Option<String>,
     #[diesel(sql_type = Timestamp)]
     pub created_at: NaiveDateTime,
     #[diesel(sql_type = Timestamp)]
@@ -52,6 +54,8 @@ impl AddMissionModel {
             max_crew: self.max_crew,
             status: MissionStatuses::Open.to_string(),
             chief_id,
+            image_url: None,
+            image_public_id: None,
         }
     }
 }
@@ -72,6 +76,8 @@ impl EditMissionModel {
             category: self.category.clone(),
             max_crew: self.max_crew,
             chief_id,
+            image_url: None,
+            image_public_id: None,
         }
     }
 }

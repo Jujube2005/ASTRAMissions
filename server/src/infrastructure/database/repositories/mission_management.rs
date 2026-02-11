@@ -4,10 +4,14 @@ use crate::{
         repositories::mission_management::MissionManagementRepository,
         value_objects::mission_statuses::MissionStatuses,
     },
-    infrastructure::database::{
-        postgresql_connection::PgPoolSquad,
-        schema::{crew_memberships, missions},
+    infrastructure::{
+        cloudinary::{UploadImageOptions},
+        database::{
+            postgresql_connection::PgPoolSquad,
+            schema::{crew_memberships, missions},
+        },
     },
+    domain::value_objects::{base64_img::Base64Img, uploaded_img::UploadedImg}
 };
 use anyhow::{Ok, Result};
 use async_trait::async_trait;
@@ -68,4 +72,28 @@ impl MissionManagementRepository for MissionManagementPostgres {
 
         Ok(())
     }
+
+    async fn upload_image(
+        &self,
+        mission_id: i32,
+        chief_id: i32,
+        base64img: Base64Img,
+        opt: UploadImageOptions,
+    ) -> Result<UploadedImg> {
+        let uploaded_img = crate::infrastructure::cloudinary::upload(base64img, opt).await?;
+
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        update(missions::table)
+            .filter(missions::id.eq(mission_id))
+            .filter(missions::chief_id.eq(chief_id))
+            .set((
+                missions::image_url.eq(uploaded_img.url.clone()),
+                missions::image_public_id.eq(uploaded_img.public_id.clone()),
+            ))
+            .execute(&mut conn)?;
+
+        Ok(uploaded_img)
+    }
 }
+

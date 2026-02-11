@@ -92,6 +92,25 @@ where
 }
 }
 
+pub async fn upload_image<T1, T2>(
+    State(user_case): State<Arc<MissionManagementUseCase<T1, T2>>>,
+    Extension(user_id): Extension<i32>,
+    Path(mission_id): Path<i32>,
+    Json(model): Json<crate::domain::value_objects::uploaded_img::UploadBase64Img>,
+) -> impl IntoResponse
+where
+    T1: MissionManagementRepository + Send + Sync,
+    T2: MissionViewingRepository + Send + Sync,
+{
+    match user_case
+        .upload_image(mission_id, user_id, model.base64_string)
+        .await
+    {
+        Ok(uploaded_img) => (StatusCode::OK, Json(uploaded_img)).into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+    }
+}
+
 pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let mission_repository = MissionManagementPostgres::new(Arc::clone(&db_pool));
     let viewing_repositiory = MissionViewingPostgres::new(Arc::clone(&db_pool));
@@ -107,6 +126,10 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
         .route(
             "/{id}",
             delete(remove::<MissionManagementPostgres, MissionViewingPostgres>),
+        )
+        .route(
+            "/{id}/image",
+            post(upload_image::<MissionManagementPostgres, MissionViewingPostgres>),
         )
         .route_layer(middleware::from_fn(auth))
         .with_state(Arc::new(user_case))

@@ -117,8 +117,11 @@ export class Profile implements OnInit {
     ref.afterClosed().subscribe(async file => {
       if (file) {
         const error = await this._user.uploadAvatarImg(file)
-        if (error)
+        if (error) {
           console.error(error)
+        } else {
+          window.location.reload()
+        }
       }
     })
   }

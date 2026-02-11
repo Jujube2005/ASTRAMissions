@@ -68,6 +68,7 @@ SELECT
         WHERE cm2.mission_id = m.id
           AND cm2.brawler_id = $2
     ) AS is_member,
+    m.image_url,
     m.created_at,
     m.updated_at
 FROM missions m
@@ -76,7 +77,7 @@ LEFT JOIN crew_memberships cm ON cm.mission_id = m.id
 WHERE m.id = $1
 GROUP BY
     m.id, b.display_name, m.name, m.description, m.category, m.max_crew,
-    m.status, m.chief_id, m.created_at, m.updated_at
+    m.status, m.chief_id, m.image_url, m.created_at, m.updated_at
 LIMIT 1
 "#;
 
@@ -121,6 +122,7 @@ SELECT
         WHERE cm2.mission_id = m.id
           AND cm2.brawler_id = $3
     ) AS is_member,
+    m.image_url,
     m.created_at,
     m.updated_at
 FROM missions m
@@ -137,7 +139,7 @@ WHERE ($1::varchar IS NULL OR m.status = $1)
   -- )
 GROUP BY
     m.id, b.display_name, m.name, m.description, m.category, m.max_crew,
-    m.status, m.chief_id, m.created_at, m.updated_at
+    m.status, m.chief_id, m.image_url, m.created_at, m.updated_at
 ORDER BY m.created_at DESC
 "#;
 
@@ -181,6 +183,7 @@ SELECT
     COALESCE(b.display_name, '') AS chief_display_name,
     COUNT(cm.brawler_id) AS crew_count,
     TRUE AS is_member,
+    m.image_url,
     m.created_at,
     m.updated_at
 FROM missions m
@@ -190,7 +193,7 @@ LEFT JOIN crew_memberships cm ON cm.mission_id = m.id
 WHERE cm_join.brawler_id = $1
 GROUP BY
     m.id, b.display_name, m.name, m.description, m.category, m.max_crew,
-    m.status, m.chief_id, m.created_at, m.updated_at
+    m.status, m.chief_id, m.image_url, m.created_at, m.updated_at
 ORDER BY m.created_at DESC
 "#;
 
@@ -267,6 +270,7 @@ SELECT
         WHERE cm2.mission_id = m.id
           AND cm2.brawler_id = $1
     ) AS is_member,
+    m.image_url,
     m.created_at,
     m.updated_at
 FROM missions m
@@ -275,7 +279,7 @@ LEFT JOIN crew_memberships cm ON cm.mission_id = m.id
 WHERE m.status != 'Completed' AND m.status != 'Failed'
 GROUP BY
     m.id, b.display_name, m.name, m.description, m.category, m.max_crew,
-    m.status, m.chief_id, m.created_at, m.updated_at
+    m.status, m.chief_id, m.image_url, m.created_at, m.updated_at
 ORDER BY crew_count DESC, m.updated_at DESC
 LIMIT 6
 "#;

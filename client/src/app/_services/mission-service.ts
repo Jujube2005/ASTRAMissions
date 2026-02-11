@@ -137,4 +137,19 @@ export class MissionService {
     const url = `${this._base_url}/mission-chat/${missionId}/messages`
     await firstValueFrom(this._http.post<void>(url, { content }))
   }
+
+  async uploadMissionImg(missionId: number, file: File): Promise<string | null> {
+    const url = `${this._base_url}/mission-management/${missionId}/image`
+    const { fileToBase64 } = await import('../_helpers/file')
+    const base64string = await fileToBase64(file)
+    const uploadImg = {
+      'base64_string': base64string.split(',')[1]
+    }
+    try {
+      await firstValueFrom(this._http.post(url, uploadImg))
+      return null
+    } catch (error: any) {
+      return error.error as string
+    }
+  }
 }

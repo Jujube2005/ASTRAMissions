@@ -114,4 +114,29 @@ where
             .await?;
         Ok(())
     }
+
+    pub async fn upload_image(
+        &self,
+        mission_id: i32,
+        chief_id: i32,
+        base64string: String,
+    ) -> Result<crate::domain::value_objects::uploaded_img::UploadedImg> {
+        use crate::domain::value_objects::base64_img::Base64Img;
+        use crate::infrastructure::cloudinary::UploadImageOptions;
+
+        let opt = UploadImageOptions {
+            folder: Some("mission".to_string()),
+            public_id: Some(mission_id.to_string()),
+            transformation: Some("c_scale,w_512".to_string()),
+        };
+
+        let base64img = Base64Img::new(base64string)?;
+
+        let uploaded = self
+            .mission_management_repository
+            .upload_image(mission_id, chief_id, base64img, opt)
+            .await?;
+
+        Ok(uploaded)
+    }
 }

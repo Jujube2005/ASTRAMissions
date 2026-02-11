@@ -86,6 +86,10 @@ diesel::table! {
         #[max_length = 255]
         status -> Varchar,
         chief_id -> Int4,
+        #[max_length = 512]
+        image_url -> Nullable<Varchar>,
+        #[max_length = 255]
+        image_public_id -> Nullable<Varchar>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         deleted_at -> Nullable<Timestamp>,

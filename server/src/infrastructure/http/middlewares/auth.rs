@@ -26,8 +26,11 @@ pub async fn auth(mut req: Request, next: Next) -> Result<Response, StatusCode> 
     };
 
     let token = token.ok_or(StatusCode::UNAUTHORIZED)?;
-
-    let jwt_env = get_jwt_env().unwrap();
+    
+    let jwt_env = get_jwt_env().map_err(|e| {
+        eprintln!(">>> ERROR: Failed to load JWT config: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
     let secret = jwt_env.secret;
 
     let claims = verify_token(secret, token).map_err(|_| StatusCode::UNAUTHORIZED)?;

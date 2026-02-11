@@ -164,6 +164,9 @@ where
     }
 
     pub async fn leave(&self, mission_id: i32, brawler_id: i32) -> Result<()> {
+        let mission = self.mission_viewing_repository.get_one(mission_id, brawler_id).await?;
+        
+        // Check if member exists? We can just try to leave.
         let result = self.crew_operation_repository
             .leave(CrewMemberShips {
                 mission_id,
@@ -171,10 +174,24 @@ where
             })
             .await;
             
-        // Broadcast leave
+        // Broadcast leave and Notify Chief
         if result.is_ok() {
              if let Ok(brawler) = self.brawler_repository.find_by_id(brawler_id).await {
+                // Broadcast to chat
                 self.log_and_broadcast_system_message(mission_id, format!("{} left the mission", brawler.display_name)).await;
+
+                // Notify Chief
+                let notification = Notification {
+                    recipient_id: Some(mission.chief_id),
+                    title: "Crew Member Left".to_string(),
+                    message: format!("{} has left your mission: {}", brawler.display_name, mission.name),
+                    notification_type: NotificationType::LeaveMission,
+                    metadata: serde_json::json!({
+                        "mission_id": mission_id,
+                        "leaver_id": brawler_id
+                    }),
+                };
+                let _ = self.notification_service.send(notification).await;
             } else {
                 self.log_and_broadcast_system_message(mission_id, "A member left the mission".to_string()).await;
             }
